@@ -1,0 +1,51 @@
+{
+  "name": "aire",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "npm run build && npm run start:dev",
+    "build": "tsc -b src",
+    "watch": "tsc -b src -w",
+    "start:watch": "tsc-watch -b src --onSuccess \"npm run start:prod\"",
+    "start:prod": "cross-env NODE_ENV=production node --enable-source-maps ./dist/index.js",
+    "start:dev": "node --enable-source-maps ./dist/index.js",
+    "lint": "eslint --fix --ext ts src tests"
+  },
+  "imports": {
+    "#root/*": "./dist/*.js",
+    "#languages": "./dist/languages/index.js",
+    "#lib/*": "./dist/lib/*.js",
+    "#lib/i18n/languageKeys": "./dist/lib/i18n/languageKeys/index.js",
+    "#lib/structures": "./dist/lib/structures/index.js",
+    "#lib/types": "./dist/lib/types/index.js",
+    "#utils/*": "./dist/lib/util/*.js",
+    "#utils/common": "./dist/lib/util/common/index.js",
+    "#utils/functions": "./dist/lib/util/functions/index.js"
+  },
+  "dependencies": {
+    "@discord-player/extractor": "^4.1.0",
+    "@discordjs/opus": "^0.9.0",
+    "@sapphire/discord.js-utilities": "next",
+    "@sapphire/duration": "next",
+    "@sapphire/framework": "next",
+    "@sapphire/plugin-api": "next",
+    "@sapphire/plugin-i18next": "next",
+    "@sapphire/plugin-logger": "next",
+    "@sapphire/plugin-subcommands": "next",
+    "@skyra/env-utilities": "^1.1.0",
+    "discord-api-types": "^0.37.35",
+    "discord-player": "^6.0.0",
+    "discord.js": "^14.7.1",
+    "ffmpeg-static": "^5.1.0",
+    "ytdl-core": "^4.11.2"
+  },
+  "devDependencies": {
+    "@sapphire/eslint-config": "^4.3.8",
+    "@sapphire/ts-config": "next",
+    "cross-env": "^7.0.3",
+    "ts-node": "^10.9.1",
+    "tsc-watch": "^6.0.0",
+    "typescript": "^4.9.5"
+  }
+}

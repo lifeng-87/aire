@@ -1,0 +1,2 @@
+# Aire
+a discord bot
