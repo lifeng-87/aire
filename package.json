@@ -43,6 +43,7 @@
   "devDependencies": {
     "@sapphire/eslint-config": "^4.3.8",
     "@sapphire/ts-config": "next",
+    "@types/node": "^18.15.0",
     "cross-env": "^7.0.3",
     "ts-node": "^10.9.1",
     "tsc-watch": "^6.0.0",

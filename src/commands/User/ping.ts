@@ -2,7 +2,7 @@ import { isMessageInstance } from "@sapphire/discord.js-utilities";
 import { ChatInputCommand, Command } from "@sapphire/framework";
 import { ApplicationCommandType } from "discord.js";
 
-export class PingCommand extends Command {
+export class UserCommand extends Command {
   public constructor(context: Command.Context, options: Command.Options) {
     super(context, { ...options });
   }
