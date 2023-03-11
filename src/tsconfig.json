@@ -7,6 +7,10 @@
     "tsBuildInfoFile": "../dist/.tsbuildinfo",
     "importsNotUsedAsValues": "preserve",
     "experimentalDecorators": true,
+    "typeRoots": [
+      "./lib/types/**/*",
+      "../node_modules/@types"
+    ],
     "moduleResolution": "node",
     "paths": {
       "#root/*": [
@@ -29,6 +33,6 @@
     "**/*.json"
   ],
   "exclude": [
-    "tsconfig.json"
+    "./tsconfig.json"
   ]
 }

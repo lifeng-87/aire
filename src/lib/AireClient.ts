@@ -1,11 +1,11 @@
 import { SapphireClient } from "@sapphire/framework";
-import { CLIENT_OPTIONS, DISCORD_TOKEN } from "#root/config";
+import { config } from "#root/config";
 import { Player } from "discord-player";
 
 export class AireClient extends SapphireClient {
   public player: Player;
   public constructor() {
-    super(CLIENT_OPTIONS);
+    super(config.discord.options);
     this.player = Player.singleton(this);
   }
 
@@ -13,7 +13,7 @@ export class AireClient extends SapphireClient {
 
   public async login() {
     this.logger.info("Connecting to Discord...");
-    return super.login(DISCORD_TOKEN);
+    return super.login(config.discord.token);
   }
 
   public destroy() {

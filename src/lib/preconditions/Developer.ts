@@ -1,4 +1,4 @@
-import { OWNERS_ID } from "#root/config";
+import { config } from "#root/config";
 import { AllFlowsPrecondition } from "@sapphire/framework";
 import {
   ChatInputCommandInteraction,
@@ -23,7 +23,7 @@ export class UserPrecondition extends AllFlowsPrecondition {
   }
 
   private check(userId: Snowflake) {
-    return OWNERS_ID.includes(userId)
+    return config.discord.owners.includes(userId)
       ? this.ok()
       : this.error({ message: this.#message });
   }

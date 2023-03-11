@@ -4,6 +4,6 @@ declare module "@skyra/env-utilities" {
   export interface Env {
     OWNERS_ID: ArrayString;
     DISCORD_TOKEN: string;
-    DEV_GUILD_ID: string;
+    DEV_GUILDS_ID: ArrayString;
   }
 }

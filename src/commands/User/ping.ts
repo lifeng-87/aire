@@ -1,3 +1,4 @@
+import { getDevGuildId } from "#utils/config";
 import { isMessageInstance } from "@sapphire/discord.js-utilities";
 import { ChatInputCommand, Command } from "@sapphire/framework";
 import { ApplicationCommandType } from "discord.js";
@@ -10,23 +11,38 @@ export class UserCommand extends Command {
   public override registerApplicationCommands(
     registry: ChatInputCommand.Registry
   ) {
-    registry.registerChatInputCommand((builder) =>
-      builder //
-        .setName("ping")
-        .setDescription("Ping bot to see if it is alive.")
+    registry.registerChatInputCommand(
+      (builder) =>
+        builder //
+          .setName("ping")
+          .setDescription("Ping bot to see if it is alive."),
+      {
+        idHints: ["1084063159029084230"],
+        guildIds: getDevGuildId(),
+      }
     );
 
-    registry.registerContextMenuCommand((builder) => {
-      builder //
-        .setName(this.name)
-        .setType(ApplicationCommandType.Message);
-    });
+    registry.registerContextMenuCommand(
+      (builder) =>
+        builder //
+          .setName(this.name)
+          .setType(ApplicationCommandType.Message),
+      {
+        idHints: ["1084063161994448946"],
+        guildIds: getDevGuildId(),
+      }
+    );
 
-    registry.registerContextMenuCommand((builder) => {
-      builder //
-        .setName(this.name)
-        .setType(ApplicationCommandType.User);
-    });
+    registry.registerContextMenuCommand(
+      (builder) =>
+        builder //
+          .setName(this.name)
+          .setType(ApplicationCommandType.User),
+      {
+        idHints: ["1084063161994448946"],
+        guildIds: getDevGuildId(),
+      }
+    );
   }
 
   public async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
