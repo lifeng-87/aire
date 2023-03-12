@@ -32,7 +32,7 @@ export class AutocompleteHandler extends InteractionHandler {
 
     switch (focusedOption.name) {
       case "query": {
-        let searchResults = await player!.search("music");
+        let searchResults = await player!.search("#music");
         const query = interaction.options.getString("query");
         if (query) {
           searchResults = await player!.search(query);
