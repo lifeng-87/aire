@@ -36,6 +36,7 @@
     "@sapphire/plugin-i18next": "next",
     "@sapphire/plugin-logger": "next",
     "@sapphire/plugin-subcommands": "next",
+    "@sapphire/shapeshift": "^3.8.1",
     "@skyra/env-utilities": "^1.1.0",
     "discord-api-types": "^0.37.35",
     "discord-player": "^6.0.0",

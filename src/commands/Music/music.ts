@@ -1,9 +1,11 @@
 import { second } from "#utils/common";
-import { voice } from "#root/lib/util/functions/perms";
+import { voice } from "#utils/functions/perms";
 import { getDevGuildId } from "#utils/config";
 import { Subcommand } from "@sapphire/plugin-subcommands";
 import { useMasterPlayer, useQueue } from "discord-player";
 import { PaginatedMessage } from "@sapphire/discord.js-utilities";
+import { s } from "@sapphire/shapeshift";
+import { createAutocomplateResult } from "#root/lib/util/functions/createAutocomplateResult";
 
 export class UserCommand extends Subcommand {
   public constructor(context: Subcommand.Context, options: Subcommand.Options) {
@@ -77,6 +79,29 @@ export class UserCommand extends Subcommand {
         guildIds: getDevGuildId(),
       }
     );
+  }
+
+  public override async autocompleteRun(
+    interaction: Subcommand.AutocompleteInteraction
+  ) {
+    const player = useMasterPlayer();
+    const query = interaction.options.getString("query");
+    const results = await player!.search(query!);
+    const url = s.string.url();
+
+    try {
+      url.parse(query);
+      return interaction.respond([]);
+    } catch (error) {
+      return interaction.respond(
+        createAutocomplateResult(
+          results.tracks.slice(0, 25).map((t) => ({
+            name: t.title,
+            value: t.url,
+          }))
+        )
+      );
+    }
   }
 
   public async chatInputPlay(
