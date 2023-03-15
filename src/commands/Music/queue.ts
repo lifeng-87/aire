@@ -38,7 +38,10 @@ export class UserCommand extends Command {
     if (pagesNum <= 0) pagesNum = 1;
 
     const tracks = queue.tracks.map(
-      (track, idx) => `**${++idx})** [${track.title}](${track.url})`
+      (track, idx) =>
+        `**${++idx})** [${track.title}](${track.url}) - <@${
+          track.requestedBy?.id
+        }>`
     );
     const paginatedMessage = new PaginatedMessage();
 
@@ -56,7 +59,7 @@ export class UserCommand extends Command {
             }
             \n**Now Playing:** [${queue.currentTrack?.title}](${
               queue.currentTrack?.url
-            })\n`
+            }) - <@${queue.currentTrack?.requestedBy?.id}>\n`
           )
           .setFooter({
             text: `${queue.tracks.size} track(s) in queue`,

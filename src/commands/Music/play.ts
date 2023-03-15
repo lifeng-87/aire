@@ -69,7 +69,7 @@ export class UserCommand extends Command {
 
     const query = interaction.options.getString("query");
 
-    const results = await player!.search(query!);
+    const results = (await player!.search(query!)).setRequestedBy(member.user);
 
     if (!results.hasTracks())
       return interaction.reply({
