@@ -39,7 +39,7 @@ export class UserCommand extends Command {
 
     const tracks = queue.tracks.map(
       (track, idx) =>
-        `**${++idx})** [${track.title}](${track.url}) - <@${
+        `**${++idx})** [${track.title.slice(0, 30)}](${track.url}) - <@${
           track.requestedBy?.id
         }>`
     );
@@ -57,9 +57,9 @@ export class UserCommand extends Command {
             `**Queue** for **session** in **${queue.channel?.name}:**\n${
               list === "" ? "\n*• No more queued tracks*" : `\n${list}`
             }
-            \n**Now Playing:** [${queue.currentTrack?.title}](${
+            \n${`**Now Playing:** [${queue.currentTrack?.title.slice(0, 30)}](${
               queue.currentTrack?.url
-            }) - <@${queue.currentTrack?.requestedBy?.id}>\n`
+            }`.padEnd(33, ".")}) - <@${queue.currentTrack?.requestedBy?.id}>\n`
           )
           .setFooter({
             text: `${queue.tracks.size} track(s) in queue`,
