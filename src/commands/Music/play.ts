@@ -4,6 +4,7 @@ import { s } from "@sapphire/shapeshift";
 import { useMasterPlayer } from "discord-player";
 import { second } from "#utils/common";
 import { type GuildMember } from "discord.js";
+import { getDevGuildId } from "#utils/config";
 
 export class UserCommand extends Command {
   public constructor(context: Command.Context, options: Command.Options) {
@@ -11,17 +12,19 @@ export class UserCommand extends Command {
   }
 
   public override registerApplicationCommands(registry: Command.Registry) {
-    registry.registerChatInputCommand((command) =>
-      command
-        .setName("play")
-        .setDescription("Play a song")
-        .addStringOption((opt) =>
-          opt
-            .setName("query")
-            .setDescription("The query of your song!")
-            .setRequired(true)
-            .setAutocomplete(true)
-        )
+    registry.registerChatInputCommand(
+      (command) =>
+        command
+          .setName("play")
+          .setDescription("Play a song")
+          .addStringOption((opt) =>
+            opt
+              .setName("query")
+              .setDescription("The query of your song!")
+              .setRequired(true)
+              .setAutocomplete(true)
+          ),
+      { guildIds: getDevGuildId() }
     );
   }
 

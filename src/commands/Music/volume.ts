@@ -1,3 +1,4 @@
+import { getDevGuildId } from "#utils/config";
 import { voice } from "#utils/functions";
 import { Command } from "@sapphire/framework";
 import { useQueue } from "discord-player";
@@ -10,17 +11,19 @@ export class UserCommand extends Command {
   public override async registerApplicationCommands(
     registry: Command.Registry
   ) {
-    registry.registerChatInputCommand((command) =>
-      command
-        .setName("volume")
-        .setDescription("Changes the volume of the track and entire queue")
-        .addIntegerOption((opt) =>
-          opt
-            .setName("amount")
-            .setDescription("The amount of volume you want to change to")
-            .setMaxValue(100)
-            .setMinValue(0)
-        )
+    registry.registerChatInputCommand(
+      (command) =>
+        command
+          .setName("volume")
+          .setDescription("Changes the volume of the track and entire queue")
+          .addIntegerOption((opt) =>
+            opt
+              .setName("amount")
+              .setDescription("The amount of volume you want to change to")
+              .setMaxValue(100)
+              .setMinValue(0)
+          ),
+      { guildIds: getDevGuildId() }
     );
   }
 

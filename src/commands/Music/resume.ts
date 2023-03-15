@@ -1,3 +1,4 @@
+import { getDevGuildId } from "#utils/config";
 import { Command } from "@sapphire/framework";
 
 export class UserCommand extends Command {
@@ -8,8 +9,9 @@ export class UserCommand extends Command {
   public override async registerApplicationCommands(
     registry: Command.Registry
   ) {
-    registry.registerChatInputCommand((command) =>
-      command.setName("resume").setDescription("resume")
+    registry.registerChatInputCommand(
+      (command) => command.setName("resume").setDescription("resume"),
+      { guildIds: getDevGuildId() }
     );
   }
 
