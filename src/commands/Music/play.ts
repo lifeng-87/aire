@@ -30,13 +30,17 @@ export class UserCommand extends Command {
   ) {
     const player = useMasterPlayer();
     const query = interaction.options.getString("query");
-    const results = await player!.search(query!);
     const url = s.string.url();
 
     try {
       url.parse(query);
       return interaction.respond([]);
     } catch (error) {
+      let results = await player!.search(query!);
+      if (!results.hasTracks()) {
+        results = await player!.search("music");
+      }
+
       return interaction.respond(
         createAutocomplateResult(
           results.tracks.slice(0, 25).map((t) => ({
