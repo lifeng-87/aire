@@ -17,7 +17,6 @@ export class UserCommand extends Command {
           .setName("ping")
           .setDescription("Ping bot to see if it is alive."),
       {
-        idHints: ["1084063159029084230"],
         guildIds: getDevGuildId(),
       }
     );

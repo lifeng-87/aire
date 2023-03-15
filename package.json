@@ -39,10 +39,12 @@
     "@sapphire/shapeshift": "^3.8.1",
     "@skyra/env-utilities": "^1.1.0",
     "discord-api-types": "^0.37.35",
-    "discord-player": "^6.0.0",
+    "discord-player": "^6.1.0",
     "discord.js": "^14.7.1",
     "ffmpeg-static": "^5.1.0",
-    "play-dl": "^1.9.6"
+    "play-dl": "^1.9.6",
+    "youtube-sr": "^4.3.4",
+    "ytdl-core": "^4.11.2"
   },
   "devDependencies": {
     "@sapphire/eslint-config": "^4.3.8",

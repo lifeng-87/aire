@@ -2,6 +2,7 @@ import { getDevGuildId } from "#utils/config";
 import { PaginatedMessage } from "@sapphire/discord.js-utilities";
 import { Command } from "@sapphire/framework";
 import { useQueue } from "discord-player";
+import { ButtonStyle, ComponentType } from "discord.js";
 
 export class UserCommand extends Command {
   public constructor(context: Command.Context, options: Command.Options) {
@@ -62,6 +63,58 @@ export class UserCommand extends Command {
           })
       );
     }
+
+    paginatedMessage.setActions([
+      {
+        customId: "@aire/paginated-messages.firstPage",
+        style: ButtonStyle.Primary,
+        emoji: "⏪",
+        type: ComponentType.Button,
+        run: ({ handler }) => (handler.index = 0),
+      },
+      {
+        customId: "@aire/paginated-messages.previousPage",
+        style: ButtonStyle.Primary,
+        emoji: "◀️",
+        type: ComponentType.Button,
+        run: ({ handler }) => {
+          if (handler.index === 0) {
+            handler.index = handler.pages.length - 1;
+          } else {
+            --handler.index;
+          }
+        },
+      },
+      {
+        customId: "@aire/paginated-messages.nextPage",
+        style: ButtonStyle.Primary,
+        emoji: "▶️",
+        type: ComponentType.Button,
+        run: ({ handler }) => {
+          if (handler.index === handler.pages.length - 1) {
+            handler.index = 0;
+          } else {
+            ++handler.index;
+          }
+        },
+      },
+      {
+        customId: "@aire/paginated-messages.goToLastPage",
+        style: ButtonStyle.Primary,
+        emoji: "⏩",
+        type: ComponentType.Button,
+        run: ({ handler }) => (handler.index = handler.pages.length - 1),
+      },
+      {
+        customId: "@aire/paginated-messages.stop",
+        style: ButtonStyle.Danger,
+        emoji: "⏹️",
+        type: ComponentType.Button,
+        run: ({ collector }) => {
+          collector.stop();
+        },
+      },
+    ]);
 
     return paginatedMessage.run(interaction);
   }
