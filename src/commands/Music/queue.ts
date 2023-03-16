@@ -39,9 +39,9 @@ export class UserCommand extends Command {
 
     const tracks = queue.tracks.map(
       (track, idx) =>
-        `**${++idx})** [${track.title.slice(0, 30)}](${track.url}) - <@${
-          track.requestedBy?.id
-        }>`
+        `**${(++idx).toString().padStart(2, "0")})** [\`${track.title}\`](${
+          track.url
+        }) - ${track.requestedBy}`
     );
     const paginatedMessage = new PaginatedMessage();
 
@@ -50,34 +50,42 @@ export class UserCommand extends Command {
     for (let i = 0; i < pagesNum; i++) {
       const list = tracks.slice(i * 5, i * 5 + 5).join("\n");
 
-      paginatedMessage.addPageEmbed((embed) =>
+      paginatedMessage.addPageEmbed((embed) => {
         embed
           .setColor("Red")
+          .setTitle(`**Queue** for **session** in **${queue.channel?.name}:**`)
+          .setThumbnail(queue.currentTrack?.thumbnail!)
           .setDescription(
-            `**Queue** for **session** in **${queue.channel?.name}:**\n${
-              list === "" ? "\n*• No more queued tracks*" : `\n${list}`
-            }
-            \n${`**Now Playing:** [${queue.currentTrack?.title.slice(0, 30)}](${
-              queue.currentTrack?.url
-            }`.padEnd(33, ".")}) - <@${queue.currentTrack?.requestedBy?.id}>\n`
+            `${`**Now Playing**\n[\`${queue.currentTrack?.title}\`](${queue.currentTrack?.url}`}) - ${
+              queue.currentTrack?.requestedBy
+            }\n`
           )
           .setFooter({
             text: `${queue.tracks.size} track(s) in queue`,
-          })
-      );
+          });
+
+        if (list != "") {
+          embed.addFields({
+            name: "More tracks",
+            value: `${list}`,
+          });
+        }
+
+        return embed;
+      });
     }
 
     paginatedMessage.setActions([
       {
-        customId: "@aire/paginated-messages.firstPage",
-        style: ButtonStyle.Primary,
+        customId: "@aire/queue-messages.firstPage",
+        style: ButtonStyle.Secondary,
         emoji: "⏪",
         type: ComponentType.Button,
         run: ({ handler }) => (handler.index = 0),
       },
       {
-        customId: "@aire/paginated-messages.previousPage",
-        style: ButtonStyle.Primary,
+        customId: "@aire/queue-messages.previousPage",
+        style: ButtonStyle.Secondary,
         emoji: "◀️",
         type: ComponentType.Button,
         run: ({ handler }) => {
@@ -89,8 +97,8 @@ export class UserCommand extends Command {
         },
       },
       {
-        customId: "@aire/paginated-messages.nextPage",
-        style: ButtonStyle.Primary,
+        customId: "@aire/queue-messages.nextPage",
+        style: ButtonStyle.Secondary,
         emoji: "▶️",
         type: ComponentType.Button,
         run: ({ handler }) => {
@@ -102,20 +110,11 @@ export class UserCommand extends Command {
         },
       },
       {
-        customId: "@aire/paginated-messages.goToLastPage",
-        style: ButtonStyle.Primary,
+        customId: "@aire/queue-messages.goToLastPage",
+        style: ButtonStyle.Secondary,
         emoji: "⏩",
         type: ComponentType.Button,
         run: ({ handler }) => (handler.index = handler.pages.length - 1),
-      },
-      {
-        customId: "@aire/paginated-messages.stop",
-        style: ButtonStyle.Danger,
-        emoji: "⏹️",
-        type: ComponentType.Button,
-        run: ({ collector }) => {
-          collector.stop();
-        },
       },
     ]);
 

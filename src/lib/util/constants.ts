@@ -23,4 +23,14 @@ export const enum Emojis {
   VerifiedBadge = "<:rtbyte_verified_badge:801919582696505364>",
   Warning = "<:rtbyte_warning:898950475628552223>",
   X = "<:rtbyte_x:801917320728543275>",
+
+  Next = "<:next:1085909310938296340>",
+  Pause = "<:pause:1085909303568908288>",
+  Play = "<:play:1085909321335963708>",
+  Repeat = "<:repeat:1085909307700297749>",
+  Shuffle = "<:shuffle:1085909319637278800>",
+  Skip = "<:skip:1085909306400063568>",
+  Sound = "<:sound:1085909312460820571>",
+  Stop = "<:stop:1085909315283603586>",
+  Undo = "<:undo:1085909316961304687>",
 }

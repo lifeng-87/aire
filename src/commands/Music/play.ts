@@ -77,14 +77,14 @@ export class UserCommand extends Command {
         ephemeral: true,
       });
 
-    await interaction.deferReply();
+    const msg = await interaction.deferReply();
 
     try {
-      const res = await player!.play(member.voice.channel!.id, results, {
+      player!.play(member.voice.channel!.id, results, {
         nodeOptions: {
           metadata: {
-            channel: interaction.channel,
-            client: interaction.guild?.members.me,
+            interaction: interaction,
+            message: msg,
           },
           leaveOnEmptyCooldown: second(30),
           leaveOnEmpty: true,
@@ -94,13 +94,13 @@ export class UserCommand extends Command {
         },
       });
 
-      await interaction.editReply({
+      /*await interaction.editReply({
         content: `Successfully enqueued${
           res.track.playlist
             ? ` **multiple tracks** from: **${res.track.playlist.title}**`
             : `: **${res.track.title}**`
         }`,
-      });
+      });*/
     } catch (error) {
       await interaction.editReply({
         content: `An **error** has occurred`,
