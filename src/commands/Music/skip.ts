@@ -19,11 +19,24 @@ export class UserCommand extends Command {
   public override async chatInputRun(
     interaction: Command.ChatInputCommandInteraction
   ) {
-    const queue = useQueue(interaction.guildId!);
+    const permissions = this.container.client.utils.voice(interaction);
+    if (!permissions.checkClientToMember()) return;
 
-    queue?.node.skip();
+    const queue = useQueue(interaction.guildId!);
+    if (!queue)
+      return interaction.reply({
+        content: `I am not in a voice channel`,
+        ephemeral: true,
+      });
+    if (!queue.currentTrack)
+      return interaction.reply({
+        content: `There is no track **currently** playing`,
+        ephemeral: true,
+      });
+
+    queue.node.skip();
     return interaction.reply({
-      content: `⏩ | I have **skipped** to the next track`,
+      content: `${this.container.client.utils.Emojis.Skip} | I have **skipped** to the next track`,
     });
   }
 }

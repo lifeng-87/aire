@@ -21,21 +21,18 @@ export class ButtonHandler extends InteractionHandler {
   }
 
   public async run(interaction: ButtonInteraction) {
+    const permissions = this.container.client.utils.voice(interaction);
+    if (!permissions.checkClientToMember()) return;
+
     const queue = useQueue(interaction.guildId!);
 
-    if (!queue) return interaction.deferUpdate();
+    if (!queue || !queue.currentTrack) return interaction.deferUpdate();
 
     queue?.node.skip();
 
-    const content = interaction.message.content;
-    const embeds = interaction.message.embeds;
-    const components = interaction.message.components;
+    const editData = this.container.client.utils.createPlayerUI(queue);
 
-    await interaction.message.edit({
-      content,
-      embeds,
-      components,
-    });
+    await interaction.message.edit(editData);
 
     return interaction.deferUpdate();
   }

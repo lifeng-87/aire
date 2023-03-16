@@ -1,13 +1,17 @@
 import { isGuildMember } from "@sapphire/discord.js-utilities";
 import { container } from "@sapphire/framework";
 import {
+  ButtonInteraction,
   ChatInputCommandInteraction,
   ContextMenuCommandInteraction,
   PermissionsBitField,
 } from "discord.js";
 
 export function voice(
-  interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction
+  interaction:
+    | ChatInputCommandInteraction
+    | ContextMenuCommandInteraction
+    | ButtonInteraction
 ) {
   const { member } = interaction;
 

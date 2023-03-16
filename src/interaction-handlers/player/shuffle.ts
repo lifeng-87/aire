@@ -3,7 +3,7 @@ import {
   InteractionHandlerTypes,
   PieceContext,
 } from "@sapphire/framework";
-import { ButtonInteraction, EmbedBuilder } from "discord.js";
+import { ButtonInteraction } from "discord.js";
 import { useQueue } from "discord-player";
 
 export class ButtonHandler extends InteractionHandler {
@@ -22,39 +22,18 @@ export class ButtonHandler extends InteractionHandler {
   }
 
   public async run(interaction: ButtonInteraction) {
+    const permissions = this.container.client.utils.voice(interaction);
+    if (!permissions.checkClientToMember()) return;
+
     const queue = useQueue(interaction.guildId!);
 
-    if (!queue) return interaction.deferUpdate();
+    if (!queue || !queue.currentTrack) return interaction.deferUpdate();
 
     queue.tracks.shuffle();
 
-    const content = interaction.message.content;
-    const components = interaction.message.components;
+    const editData = this.container.client.utils.createPlayerUI(queue);
 
-    const next = queue.tracks.at(0);
-
-    const embed = new EmbedBuilder()
-      .setTitle(`${queue.currentTrack?.title}`)
-      .setURL(queue.currentTrack?.url!)
-      .setThumbnail(queue.currentTrack?.thumbnail!)
-      .setDescription(
-        `▶️ ${queue.node
-          .createProgressBar({ queue: false })
-          ?.replaceAll("┃", "")}`
-      );
-
-    if (next) {
-      embed.addFields({
-        name: "Next track",
-        value: `[\`${next?.title}\`](${next?.url}) - ${next?.requestedBy}`,
-      });
-    }
-
-    await interaction.message.edit({
-      content,
-      embeds: [embed],
-      components,
-    });
+    await interaction.message.edit(editData);
 
     return interaction.deferUpdate();
   }

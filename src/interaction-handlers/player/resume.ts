@@ -3,14 +3,8 @@ import {
   InteractionHandlerTypes,
   PieceContext,
 } from "@sapphire/framework";
-import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonInteraction,
-  ButtonStyle,
-} from "discord.js";
+import { ButtonInteraction } from "discord.js";
 import { useQueue } from "discord-player";
-import { Emojis } from "#root/lib/util/constants";
 
 export class ButtonHandler extends InteractionHandler {
   public constructor(ctx: PieceContext, options: InteractionHandler.Options) {
@@ -28,40 +22,18 @@ export class ButtonHandler extends InteractionHandler {
   }
 
   public async run(interaction: ButtonInteraction) {
+    const permissions = this.container.client.utils.voice(interaction);
+    if (!permissions.checkClientToMember()) return;
+
     const queue = useQueue(interaction.guildId!);
 
-    if (!queue) return interaction.deferUpdate();
+    if (!queue || !queue.currentTrack) return interaction.deferUpdate();
 
-    queue?.node.resume();
+    queue.node.resume();
 
-    const content = interaction.message.content;
-    const embeds = interaction.message.embeds;
+    const editData = this.container.client.utils.createPlayerUI(queue);
 
-    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-      new ButtonBuilder()
-        .setCustomId("@aire/player-button.pause")
-        .setEmoji(Emojis.Pause)
-        .setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder()
-        .setCustomId("@aire/player-button.skip")
-        .setEmoji(Emojis.Skip)
-        .setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder()
-        .setCustomId("@aire/player-button.shuffle")
-        .setEmoji(Emojis.Shuffle)
-        .setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder()
-        .setCustomId("@aire/player-button.repeat")
-        .setLabel(["off", "track", "queue", "auto play"][queue?.repeatMode])
-        .setEmoji(Emojis.Repeat)
-        .setStyle(ButtonStyle.Secondary)
-    );
-
-    await interaction.message.edit({
-      content,
-      embeds,
-      components: [row],
-    });
+    await interaction.message.edit(editData);
 
     return interaction.deferUpdate();
   }

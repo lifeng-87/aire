@@ -1,7 +1,6 @@
-import { createAutocomplateResult, voice } from "#utils/functions";
 import { Command } from "@sapphire/framework";
 import { s } from "@sapphire/shapeshift";
-import { useMasterPlayer } from "discord-player";
+import { useMasterPlayer, useQueue } from "discord-player";
 import { second } from "#utils/common";
 import { type GuildMember } from "discord.js";
 import { getDevGuildId } from "#utils/config";
@@ -21,7 +20,6 @@ export class UserCommand extends Command {
             opt
               .setName("query")
               .setDescription("The query of your song!")
-              .setRequired(true)
               .setAutocomplete(true)
           ),
       { guildIds: getDevGuildId() }
@@ -41,11 +39,13 @@ export class UserCommand extends Command {
     } catch (error) {
       let results = await player!.search(query!);
       if (!results.hasTracks()) {
-        results = await player!.search("music");
+        results = await player!.search("#music", {
+          searchEngine: "youtubeSearch",
+        });
       }
 
       return interaction.respond(
-        createAutocomplateResult(
+        this.container.client.utils.createAutocomplateResult(
           results.tracks.slice(0, 25).map((t) => ({
             name: t.title,
             value: t.url,
@@ -58,16 +58,34 @@ export class UserCommand extends Command {
   public override async chatInputRun(
     interaction: Command.ChatInputCommandInteraction
   ) {
-    const player = useMasterPlayer();
-    const permissions = voice(interaction);
-
+    const permissions = this.container.client.utils.voice(interaction);
     if (!permissions.checkClient()) return;
     if (!permissions.checkMember()) return;
     if (!permissions.checkClientToMember()) return;
 
-    const member = interaction.member as GuildMember;
-
     const query = interaction.options.getString("query");
+    if (!query) {
+      const queue = useQueue(interaction.guildId!);
+      if (!queue)
+        return interaction.reply({
+          content: `I am not in a voice channel`,
+          ephemeral: true,
+        });
+      if (!queue.currentTrack)
+        return interaction.reply({
+          content: `There is no track **currently** playing`,
+          ephemeral: true,
+        });
+
+      queue.node.resume();
+      return interaction.reply({
+        content: `${this.container.client.utils.Emojis.Play} | **Playback** has been **resumed**`,
+      });
+    }
+
+    const player = useMasterPlayer();
+
+    const member = interaction.member as GuildMember;
 
     const results = (await player!.search(query!)).setRequestedBy(member.user);
 

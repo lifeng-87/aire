@@ -21,6 +21,9 @@ export class UserCommand extends Command {
   public override async chatInputRun(
     interaction: Command.ChatInputCommandInteraction
   ) {
+    const permissions = this.container.client.utils.voice(interaction);
+    if (!permissions.checkClientToMember()) return;
+
     const queue = useQueue(interaction.guildId!);
 
     if (!queue)

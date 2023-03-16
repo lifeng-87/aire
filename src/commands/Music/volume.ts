@@ -50,11 +50,11 @@ export class UserCommand extends Command {
         content: `🔊 | **Current** volume is **${queue?.node.volume}%**`,
       });
 
-    if (permissions.checkClientToMember()) return;
+    if (!permissions.checkClientToMember()) return;
 
     queue?.node.setVolume(volume);
     return interaction.reply({
-      content: `I **changed** the volume to: **${queue?.node.volume}%**`,
+      content: `🔊 | I **changed** the volume to: **${queue?.node.volume}%**`,
     });
   }
 }

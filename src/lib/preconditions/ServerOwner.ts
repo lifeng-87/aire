@@ -1,5 +1,4 @@
 import { AllFlowsPrecondition } from "@sapphire/framework";
-import { isGuildOwner } from "../util/functions";
 import {
   ChatInputCommandInteraction,
   ContextMenuCommandInteraction,
@@ -23,7 +22,7 @@ export class UserPrecondition extends AllFlowsPrecondition {
   }
 
   private check(member: GuildMember) {
-    return isGuildOwner(member)
+    return this.container.client.utils.isGuildOwner(member)
       ? this.ok()
       : this.error({ message: this.#message });
   }
