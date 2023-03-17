@@ -15,7 +15,7 @@ export class ButtonHandler extends InteractionHandler {
   }
 
   public override parse(interaction: ButtonInteraction) {
-    if (interaction.customId !== "@aire/player-button.repeat")
+    if (interaction.customId !== "@aire/player-button.update")
       return this.none();
 
     return this.some();
@@ -28,8 +28,6 @@ export class ButtonHandler extends InteractionHandler {
     const queue = useQueue(interaction.guildId!);
 
     if (!queue) return interaction.deferUpdate();
-
-    queue.setRepeatMode(queue.repeatMode === 3 ? 0 : queue.repeatMode + 1);
 
     const editData = this.container.client.utils.createPlayerUI(queue);
 

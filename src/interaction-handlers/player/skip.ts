@@ -26,13 +26,13 @@ export class ButtonHandler extends InteractionHandler {
 
     const queue = useQueue(interaction.guildId!);
 
-    if (!queue || !queue.currentTrack) return interaction.deferUpdate();
+    if (!queue) return interaction.deferUpdate();
 
     queue?.node.skip();
 
-    const editData = this.container.client.utils.createPlayerUI(queue);
+    //const editData = this.container.client.utils.createPlayerUI(queue);
 
-    await interaction.message.edit(editData);
+    //await interaction.message.edit(editData);
 
     return interaction.deferUpdate();
   }

@@ -27,7 +27,7 @@ export class ButtonHandler extends InteractionHandler {
 
     const queue = useQueue(interaction.guildId!);
 
-    if (!queue || !queue.currentTrack) return interaction.deferUpdate();
+    if (!queue) return interaction.deferUpdate();
 
     queue.node.pause();
 

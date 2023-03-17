@@ -1,10 +1,6 @@
-import {
-  ChatInputCommandInteraction,
-  ContextMenuCommandInteraction,
-  Message,
-} from "discord.js";
+import { InteractionResponse, Message, TextChannel } from "discord.js";
 
 export interface Metadata {
-  interaction: ChatInputCommandInteraction | ContextMenuCommandInteraction;
-  message: Message;
+  message: Message | InteractionResponse;
+  channel: TextChannel;
 }

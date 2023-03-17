@@ -15,8 +15,7 @@ export class ButtonHandler extends InteractionHandler {
   }
 
   public override parse(interaction: ButtonInteraction) {
-    if (interaction.customId !== "@aire/player-button.repeat")
-      return this.none();
+    if (interaction.customId !== "@aire/player-button.stop") return this.none();
 
     return this.some();
   }
@@ -29,7 +28,7 @@ export class ButtonHandler extends InteractionHandler {
 
     if (!queue) return interaction.deferUpdate();
 
-    queue.setRepeatMode(queue.repeatMode === 3 ? 0 : queue.repeatMode + 1);
+    queue?.node.stop();
 
     const editData = this.container.client.utils.createPlayerUI(queue);
 

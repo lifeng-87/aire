@@ -9,6 +9,7 @@ export class PlayListener extends Listener {
       ...options,
       event: "playerStart",
       emitter: container.client.player.events,
+      enabled: false,
     });
   }
 

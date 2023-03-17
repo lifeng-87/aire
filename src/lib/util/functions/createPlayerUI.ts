@@ -8,6 +8,14 @@ import {
 import { Emojis } from "../constants";
 
 export function createPlayerUI(queue: GuildQueue) {
+  /*if (!queue?.currentTrack) {
+    const embed = new EmbedBuilder().setDescription(
+      `There is no track **currently** playing`
+    );
+
+    return { content: "", embeds: [embed], components: [] };
+  }*/
+
   const next = queue.tracks.at(0);
 
   const embed = new EmbedBuilder()
@@ -15,7 +23,7 @@ export function createPlayerUI(queue: GuildQueue) {
     .setURL(queue.currentTrack?.url!)
     .setThumbnail(queue.currentTrack?.thumbnail!)
     .setDescription(
-      `▶️ ${queue.node
+      `${Emojis.Sound} ${queue.node
         .createProgressBar({ queue: false })
         ?.replaceAll("┃", "")}`
     );
@@ -48,16 +56,29 @@ export function createPlayerUI(queue: GuildQueue) {
       .setCustomId("@aire/player-button.repeat")
       .setLabel(["Off", "Track", "Queue", "Auto Play"][queue.repeatMode])
       .setEmoji(Emojis.Repeat)
+      .setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder()
+      .setCustomId("@aire/player-button.stop")
+      .setEmoji(Emojis.Stop)
       .setStyle(ButtonStyle.Secondary)
   );
 
-  /*const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(
+  const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
-      .setCustomId("@aire/player-button.related")
-      .setEmoji("🔥")
-      .setLabel("Related")
+      .setCustomId("@aire/player-button.queue")
+      .setEmoji(Emojis.PlaylistPlay)
+      .setLabel("Queue")
+      .setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder()
+      .setCustomId("@aire/player-button.update")
+      .setEmoji(Emojis.Undo)
+      .setLabel("Update")
       .setStyle(ButtonStyle.Primary)
-  );*/
+  );
 
-  return { embeds: [embed], components: [row1] };
+  return {
+    content: "🎶 Playing 🎶",
+    embeds: [embed, embed],
+    components: [row1, row2],
+  };
 }

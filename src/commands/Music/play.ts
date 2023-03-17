@@ -1,9 +1,9 @@
 import { Command } from "@sapphire/framework";
 import { s } from "@sapphire/shapeshift";
-import { useMasterPlayer, useQueue } from "discord-player";
-import { second } from "#utils/common";
-import { type GuildMember } from "discord.js";
+import { useMasterPlayer } from "discord-player";
+import { type TextChannel, type GuildMember } from "discord.js";
 import { getDevGuildId } from "#utils/config";
+import type { Metadata } from "#lib/types/GuildQueueMeta";
 
 export class UserCommand extends Command {
   public constructor(context: Command.Context, options: Command.Options) {
@@ -63,9 +63,11 @@ export class UserCommand extends Command {
     if (!permissions.checkMember()) return;
     if (!permissions.checkClientToMember()) return;
 
+    const player = useMasterPlayer();
+
     const query = interaction.options.getString("query");
     if (!query) {
-      const queue = useQueue(interaction.guildId!);
+      const queue = player?.queues.get(interaction.guildId!);
       if (!queue)
         return interaction.reply({
           content: `I am not in a voice channel`,
@@ -83,8 +85,6 @@ export class UserCommand extends Command {
       });
     }
 
-    const player = useMasterPlayer();
-
     const member = interaction.member as GuildMember;
 
     const results = (await player!.search(query!)).setRequestedBy(member.user);
@@ -95,22 +95,39 @@ export class UserCommand extends Command {
         ephemeral: true,
       });
 
-    const msg = await interaction.deferReply();
+    const message = await interaction.reply("Preparing player...");
 
     try {
-      player!.play(member.voice.channel!.id, results, {
-        nodeOptions: {
-          metadata: {
-            interaction: interaction,
-            message: msg,
+      const queue = player?.queues.get<Metadata>(interaction.guildId!);
+
+      if (queue) {
+        queue.metadata.message?.edit({
+          content: `The controller has been moved to the latest message`,
+          embeds: [],
+          components: [],
+        });
+
+        queue.setMetadata({
+          channel: interaction.channel as TextChannel,
+          message: message,
+        });
+
+        return player?.play(member.voice.channel!.id, results);
+      } else {
+        return player?.play(member.voice.channel!.id, results, {
+          nodeOptions: {
+            metadata: {
+              channel: interaction.channel!,
+              message: message,
+            },
+            leaveOnEmptyCooldown: this.container.client.utils.second(30),
+            leaveOnEmpty: true,
+            leaveOnEnd: false,
+            bufferingTimeout: 0,
+            selfDeaf: true,
           },
-          leaveOnEmptyCooldown: second(30),
-          leaveOnEmpty: true,
-          leaveOnEnd: false,
-          bufferingTimeout: 0,
-          selfDeaf: true,
-        },
-      });
+        });
+      }
 
       /*await interaction.editReply({
         content: `Successfully enqueued${
@@ -120,7 +137,7 @@ export class UserCommand extends Command {
         }`,
       });*/
     } catch (error) {
-      await interaction.editReply({
+      await message.edit({
         content: `An **error** has occurred`,
       });
       return this.container.logger.error(error);
