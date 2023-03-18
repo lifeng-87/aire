@@ -1,6 +1,6 @@
-import { InteractionResponse, Message, TextChannel } from "discord.js";
+import { Message, TextChannel } from "discord.js";
 
 export interface Metadata {
-  message: Message | InteractionResponse;
+  message: Message;
   channel: TextChannel;
 }

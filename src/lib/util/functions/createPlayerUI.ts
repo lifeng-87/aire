@@ -1,4 +1,3 @@
-import { GuildQueue } from "discord-player";
 import {
   ActionRowBuilder,
   ButtonBuilder,
@@ -6,15 +5,19 @@ import {
   EmbedBuilder,
 } from "discord.js";
 import { Emojis } from "../constants";
+import { useQueue } from "discord-player";
+import type { Metadata } from "#root/lib/types/GuildQueueMeta";
 
-export function createPlayerUI(queue: GuildQueue) {
-  /*if (!queue?.currentTrack) {
-    const embed = new EmbedBuilder().setDescription(
-      `There is no track **currently** playing`
-    );
+export async function createPlayerUI(guildId: string) {
+  const queue = useQueue<Metadata>(guildId);
 
-    return { content: "", embeds: [embed], components: [] };
-  }*/
+  if (!queue?.currentTrack) {
+    return await queue?.metadata.message.edit({
+      content: `All tracks play finish`,
+      embeds: [],
+      components: [],
+    });
+  }
 
   const next = queue.tracks.at(0);
 
@@ -22,16 +25,25 @@ export function createPlayerUI(queue: GuildQueue) {
     .setTitle(queue.currentTrack?.title!)
     .setURL(queue.currentTrack?.url!)
     .setThumbnail(queue.currentTrack?.thumbnail!)
-    .setDescription(
-      `${Emojis.Sound} ${queue.node
-        .createProgressBar({ queue: false })
-        ?.replaceAll("┃", "")}`
-    );
+    .setDescription(`Requset by: ${queue.currentTrack?.requestedBy}`)
+    .addFields({
+      name: "Progress",
+      value: `${
+        queue.node.getTimestamp()?.current.label
+      } >${queue.node.createProgressBar({
+        timecodes: false,
+        queue: false,
+      })}< ${queue.node.getTimestamp()?.total.label}`,
+    })
+    .setFooter({
+      text: `${queue.tracks.size} track(s) in queue`,
+    })
+    .setTimestamp();
 
   if (next) {
     embed.addFields({
       name: "Next track",
-      value: `[\`${next?.title}\`](${next?.url}) - ${next?.requestedBy}`,
+      value: `[\`${next?.title}\`](${next?.url})\nRequset by: ${next?.requestedBy}`,
     });
   }
 
@@ -65,20 +77,15 @@ export function createPlayerUI(queue: GuildQueue) {
 
   const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder()
-      .setCustomId("@aire/player-button.queue")
-      .setEmoji(Emojis.PlaylistPlay)
-      .setLabel("Queue")
-      .setStyle(ButtonStyle.Secondary),
-    new ButtonBuilder()
       .setCustomId("@aire/player-button.update")
       .setEmoji(Emojis.Undo)
       .setLabel("Update")
       .setStyle(ButtonStyle.Primary)
   );
 
-  return {
-    content: "🎶 Playing 🎶",
-    embeds: [embed, embed],
+  return await queue.metadata.message.edit({
+    content: "🎶 **Playing** 🎶",
+    embeds: [embed],
     components: [row1, row2],
-  };
+  });
 }

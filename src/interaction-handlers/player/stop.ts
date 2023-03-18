@@ -15,24 +15,28 @@ export class ButtonHandler extends InteractionHandler {
   }
 
   public override parse(interaction: ButtonInteraction) {
-    if (interaction.customId !== "@aire/player-button.stop") return this.none();
+    if (interaction.customId !== `@aire/player-button.${this.name}`)
+      return this.none();
 
     return this.some();
   }
 
   public async run(interaction: ButtonInteraction) {
-    const permissions = this.container.client.utils.voice(interaction);
-    if (!permissions.checkClientToMember()) return;
+    const { voice, voiceButton, createPlayerUI } = this.container.client.utils;
+    const voicePerms = voice(interaction);
+    const btnPerms = voiceButton(interaction);
+
+    if (!btnPerms.checkMessage()) return;
+    if (!btnPerms.checkQueue()) return;
 
     const queue = useQueue(interaction.guildId!);
 
-    if (!queue) return interaction.deferUpdate();
+    if (!voicePerms.checkMember()) return;
+    if (!voicePerms.checkClientToMember()) return;
 
-    queue?.node.stop();
+    queue?.delete();
 
-    const editData = this.container.client.utils.createPlayerUI(queue);
-
-    await interaction.message.edit(editData);
+    await createPlayerUI(interaction.guildId!);
 
     return interaction.deferUpdate();
   }

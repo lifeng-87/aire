@@ -25,7 +25,7 @@ export class PlayListener extends Listener {
     if (missingPerms.length) return;
 
     const message = await queue.metadata.message.edit({
-      content: `There is no track **currently** playing`,
+      content: `All tracks play finish`,
       embeds: [],
       components: [],
     });

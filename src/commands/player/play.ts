@@ -1,25 +1,34 @@
 import { Command } from "@sapphire/framework";
 import { s } from "@sapphire/shapeshift";
 import { useMasterPlayer } from "discord-player";
-import { type TextChannel, type GuildMember } from "discord.js";
+import {
+  type TextChannel,
+  type GuildMember,
+  ButtonBuilder,
+  ActionRowBuilder,
+  ButtonStyle,
+} from "discord.js";
 import { getDevGuildId } from "#utils/config";
 import type { Metadata } from "#lib/types/GuildQueueMeta";
 
 export class UserCommand extends Command {
   public constructor(context: Command.Context, options: Command.Options) {
-    super(context, { ...options });
+    super(context, {
+      ...options,
+      description: "Plays and enqueues track(s) of the query provided",
+    });
   }
 
   public override registerApplicationCommands(registry: Command.Registry) {
     registry.registerChatInputCommand(
       (command) =>
         command
-          .setName("play")
-          .setDescription("Play a song")
+          .setName(this.name)
+          .setDescription(this.description)
           .addStringOption((opt) =>
             opt
               .setName("query")
-              .setDescription("The query of your song!")
+              .setDescription("A query of your choice")
               .setAutocomplete(true)
           ),
       { guildIds: getDevGuildId() }
@@ -58,14 +67,11 @@ export class UserCommand extends Command {
   public override async chatInputRun(
     interaction: Command.ChatInputCommandInteraction
   ) {
-    const permissions = this.container.client.utils.voice(interaction);
-    if (!permissions.checkClient()) return;
-    if (!permissions.checkMember()) return;
-    if (!permissions.checkClientToMember()) return;
-
+    const { voice } = this.container.client.utils;
+    const permissions = voice(interaction);
     const player = useMasterPlayer();
-
     const query = interaction.options.getString("query");
+
     if (!query) {
       const queue = player?.queues.get(interaction.guildId!);
       if (!queue)
@@ -79,11 +85,17 @@ export class UserCommand extends Command {
           ephemeral: true,
         });
 
+      if (!permissions.checkClientToMember()) return;
+
       queue.node.resume();
       return interaction.reply({
         content: `${this.container.client.utils.Emojis.Play} | **Playback** has been **resumed**`,
       });
     }
+
+    if (!permissions.checkClient()) return;
+    if (!permissions.checkMember()) return;
+    if (!permissions.checkClientToMember()) return;
 
     const member = interaction.member as GuildMember;
 
@@ -95,16 +107,26 @@ export class UserCommand extends Command {
         ephemeral: true,
       });
 
-    const message = await interaction.reply("Preparing player...");
+    const message = await interaction.reply({
+      content: "Preparing player...",
+      fetchReply: true,
+    });
 
     try {
       const queue = player?.queues.get<Metadata>(interaction.guildId!);
 
       if (queue) {
         queue.metadata.message?.edit({
-          content: `The controller has been moved to the latest message`,
+          content: "There has new treak(s) enqueued!",
           embeds: [],
-          components: [],
+          components: [
+            new ActionRowBuilder<ButtonBuilder>().addComponents(
+              new ButtonBuilder()
+                .setStyle(ButtonStyle.Link)
+                .setURL(message.url)
+                .setLabel("Took me to the new controller")
+            ),
+          ],
         });
 
         queue.setMetadata({

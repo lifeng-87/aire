@@ -4,14 +4,17 @@ import { useQueue } from "discord-player";
 
 export class UserCommand extends Command {
   public constructor(context: Command.Context, options: Command.Options) {
-    super(context, { ...options });
+    super(context, {
+      ...options,
+      description: "Shuffles the tracks in the queue",
+    });
   }
 
   public override async registerApplicationCommands(
     registry: Command.Registry
   ) {
     registry.registerChatInputCommand(
-      (command) => command.setName("shuffle").setDescription("shuffle"),
+      (command) => command.setName(this.name).setDescription(this.description),
       { guildIds: getDevGuildId() }
     );
   }
@@ -19,8 +22,8 @@ export class UserCommand extends Command {
   public override async chatInputRun(
     interaction: Command.ChatInputCommandInteraction
   ) {
-    const permissions = this.container.client.utils.voice(interaction);
-    if (!permissions.checkClientToMember()) return;
+    const { voice, Emojis, createPlayerUI } = this.container.client.utils;
+    const permissions = voice(interaction);
 
     const queue = useQueue(interaction.guildId!);
     if (!queue)
@@ -28,6 +31,9 @@ export class UserCommand extends Command {
         content: `I am **not** in a voice channel`,
         ephemeral: true,
       });
+
+    if (!permissions.checkClientToMember()) return;
+
     if (queue.tracks.size < 2)
       return interaction.reply({
         content: `There are not **enough tracks** in queue to **shuffle**`,
@@ -35,8 +41,11 @@ export class UserCommand extends Command {
       });
 
     queue.tracks.shuffle();
+
+    await createPlayerUI(interaction.guildId!);
+
     return interaction.reply({
-      content: `${this.container.client.utils.Emojis.Shuffle} | I have **shuffled** the queue`,
+      content: `${Emojis.Shuffle} | I have **shuffled** the queue`,
     });
   }
 }

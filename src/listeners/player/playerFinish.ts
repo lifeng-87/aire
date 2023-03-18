@@ -23,10 +23,10 @@ export class PlayListener extends Listener {
       .missing(resolved);
     if (missingPerms.length) return;
 
-    const editData = this.container.client.utils.createPlayerUI(queue);
+    const message = await this.container.client.utils.createPlayerUI(
+      queue.guild.id
+    );
 
-    const message = await queue.metadata.message.edit(editData);
-
-    queue.setMetadata({ channel: queue.metadata.channel, message: message });
+    queue.setMetadata({ channel: queue.metadata.channel, message: message! });
   }
 }

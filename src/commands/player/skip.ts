@@ -4,14 +4,17 @@ import { useQueue } from "discord-player";
 
 export class UserCommand extends Command {
   public constructor(context: Command.Context, options: Command.Options) {
-    super(context, { ...options });
+    super(context, {
+      ...options,
+      description: "Skips the current track and automatically plays the next",
+    });
   }
 
   public override async registerApplicationCommands(
     registry: Command.Registry
   ) {
     registry.registerChatInputCommand(
-      (command) => command.setName("skip").setDescription("skip"),
+      (command) => command.setName(this.name).setDescription(this.description),
       { guildIds: getDevGuildId() }
     );
   }
@@ -19,8 +22,8 @@ export class UserCommand extends Command {
   public override async chatInputRun(
     interaction: Command.ChatInputCommandInteraction
   ) {
-    const permissions = this.container.client.utils.voice(interaction);
-    if (!permissions.checkClientToMember()) return;
+    const { voice, Emojis, createPlayerUI } = this.container.client.utils;
+    const permissions = voice(interaction);
 
     const queue = useQueue(interaction.guildId!);
     if (!queue)
@@ -28,6 +31,9 @@ export class UserCommand extends Command {
         content: `I am not in a voice channel`,
         ephemeral: true,
       });
+
+    if (!permissions.checkClientToMember()) return;
+
     if (!queue.currentTrack)
       return interaction.reply({
         content: `There is no track **currently** playing`,
@@ -35,8 +41,10 @@ export class UserCommand extends Command {
       });
 
     queue.node.skip();
+
+    await createPlayerUI(interaction.guildId!);
     return interaction.reply({
-      content: `${this.container.client.utils.Emojis.Skip} | I have **skipped** to the next track`,
+      content: `${Emojis.Skip} | I have **skipped** to the next track`,
     });
   }
 }

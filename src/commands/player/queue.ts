@@ -6,14 +6,17 @@ import { ButtonStyle, ComponentType } from "discord.js";
 
 export class UserCommand extends Command {
   public constructor(context: Command.Context, options: Command.Options) {
-    super(context, { ...options });
+    super(context, {
+      ...options,
+      description: "Displays the queue in an embed",
+    });
   }
 
   public override async registerApplicationCommands(
     registry: Command.Registry
   ) {
     registry.registerChatInputCommand(
-      (command) => command.setName("queue").setDescription("queue"),
+      (command) => command.setName(this.name).setDescription(this.description),
       { guildIds: getDevGuildId() }
     );
   }
@@ -21,8 +24,8 @@ export class UserCommand extends Command {
   public override async chatInputRun(
     interaction: Command.ChatInputCommandInteraction
   ) {
-    const permissions = this.container.client.utils.voice(interaction);
-    if (!permissions.checkClientToMember()) return;
+    const { voice } = this.container.client.utils;
+    const permissions = voice(interaction);
 
     const queue = useQueue(interaction.guildId!);
 
@@ -31,6 +34,9 @@ export class UserCommand extends Command {
         content: `I am **not** in a voice channel`,
         ephemeral: true,
       });
+
+    if (!permissions.checkClientToMember()) return;
+
     if (!queue.tracks || !queue.currentTrack)
       return interaction.reply({
         content: `There is **no** queue to **display**`,
@@ -42,10 +48,12 @@ export class UserCommand extends Command {
 
     const tracks = queue.tracks.map(
       (track, idx) =>
-        `**${(++idx).toString().padStart(2, "0")})** [\`${track.title}\`](${
+        `**${(++idx).toString().padStart(2, "0")})**\n[\`${track.title}\`](${
           track.url
-        }) - ${track.requestedBy}`
+        })\nRequested by: ${track.requestedBy}`
     );
+
+    await interaction.deferReply({ ephemeral: true });
     const paginatedMessage = new PaginatedMessage();
 
     // handle error if pages exceed 25 pages
@@ -59,9 +67,9 @@ export class UserCommand extends Command {
           .setTitle(`**Queue** for **session** in **${queue.channel?.name}:**`)
           .setThumbnail(queue.currentTrack?.thumbnail!)
           .setDescription(
-            `${`**Now Playing**\n[\`${queue.currentTrack?.title}\`](${queue.currentTrack?.url}`}) - ${
+            `${`**Now Playing**\n[\`${queue.currentTrack?.title}\`](${queue.currentTrack?.url}`})\nRequested by: ${
               queue.currentTrack?.requestedBy
-            }\n`
+            }`
           )
           .setFooter({
             text: `${queue.tracks.size} track(s) in queue`,

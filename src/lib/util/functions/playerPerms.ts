@@ -1,9 +1,11 @@
+import type { Metadata } from "#root/lib/types/GuildQueueMeta";
 import { isGuildMember } from "@sapphire/discord.js-utilities";
 import { container } from "@sapphire/framework";
+import { useQueue } from "discord-player";
 import {
-  ButtonInteraction,
-  ChatInputCommandInteraction,
-  ContextMenuCommandInteraction,
+  type ButtonInteraction,
+  type ChatInputCommandInteraction,
+  type ContextMenuCommandInteraction,
   PermissionsBitField,
 } from "discord.js";
 
@@ -18,7 +20,7 @@ export function voice(
   if (!isGuildMember(member))
     throw container.logger.error("is not GuildMember");
 
-  const checkClient = (): boolean => {
+  const checkClient = async () => {
     const resolved = new PermissionsBitField([
       PermissionsBitField.Flags.Connect,
       PermissionsBitField.Flags.Speak,
@@ -50,7 +52,7 @@ export function voice(
     return true;
   };
 
-  const checkMember = (): boolean => {
+  const checkMember = async () => {
     if (!member.voice.channel) {
       const content = `You **need** to be in a voice channel.`;
       if (interaction.deferred) {
@@ -63,7 +65,7 @@ export function voice(
     return true;
   };
 
-  const checkClientToMember = (): boolean => {
+  const checkClientToMember = async () => {
     if (
       interaction.guild?.members.me?.voice.channelId &&
       member.voice.channelId !== interaction.guild?.members.me?.voice.channelId
@@ -82,4 +84,35 @@ export function voice(
   };
 
   return { checkClient, checkClientToMember, checkMember };
+}
+
+export function voiceButton(interaction: ButtonInteraction) {
+  const queue = useQueue<Metadata>(interaction.guildId!);
+
+  const checkQueue = async () => {
+    if (!queue) {
+      interaction.reply({
+        content: `I am not in a voice channel!`,
+        ephemeral: true,
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const checkMessage = () => {
+    if (interaction.message.id != queue?.metadata.message.id) {
+      interaction.message.edit({
+        content: "This controller is expired!",
+        embeds: [],
+        components: [],
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  return { checkQueue, checkMessage };
 }

@@ -1,11 +1,13 @@
 import { getDevGuildId } from "#utils/config";
-import { voice } from "#utils/functions";
 import { Command } from "@sapphire/framework";
 import { useQueue } from "discord-player";
 
 export class UserCommand extends Command {
   public constructor(context: Command.Context, options: Command.Options) {
-    super(context, { ...options });
+    super(context, {
+      ...options,
+      description: "Changes the volume of the track and entire queue",
+    });
   }
 
   public override async registerApplicationCommands(
@@ -14,8 +16,8 @@ export class UserCommand extends Command {
     registry.registerChatInputCommand(
       (command) =>
         command
-          .setName("volume")
-          .setDescription("Changes the volume of the track and entire queue")
+          .setName(this.name)
+          .setDescription(this.description)
           .addIntegerOption((opt) =>
             opt
               .setName("amount")
@@ -30,6 +32,7 @@ export class UserCommand extends Command {
   public override async chatInputRun(
     interaction: Command.ChatInputCommandInteraction
   ) {
+    const { voice } = this.container.client.utils;
     const queue = useQueue(interaction.guildId!);
     const permissions = voice(interaction);
     const volume = interaction.options.getInteger("amount");
@@ -39,6 +42,9 @@ export class UserCommand extends Command {
         content: `I am not in a voice channel`,
         ephemeral: true,
       });
+
+    if (!permissions.checkClientToMember()) return;
+
     if (!queue.currentTrack)
       return interaction.reply({
         content: `There is no track **currently** playing`,
@@ -49,8 +55,6 @@ export class UserCommand extends Command {
       return interaction.reply({
         content: `🔊 | **Current** volume is **${queue?.node.volume}%**`,
       });
-
-    if (!permissions.checkClientToMember()) return;
 
     queue?.node.setVolume(volume);
     return interaction.reply({

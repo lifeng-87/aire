@@ -4,14 +4,17 @@ import { useQueue } from "discord-player";
 
 export class UserCommand extends Command {
   public constructor(context: Command.Context, options: Command.Options) {
-    super(context, { ...options });
+    super(context, {
+      ...options,
+      description: "Pauses or resumes the current track",
+    });
   }
 
   public override async registerApplicationCommands(
     registry: Command.Registry
   ) {
     registry.registerChatInputCommand(
-      (command) => command.setName("pause").setDescription("pause"),
+      (command) => command.setName(this.name).setDescription(this.description),
       { guildIds: getDevGuildId() }
     );
   }
@@ -19,20 +22,25 @@ export class UserCommand extends Command {
   public override async chatInputRun(
     interaction: Command.ChatInputCommandInteraction
   ) {
-    const permissions = this.container.client.utils.voice(interaction);
-    if (!permissions.checkClientToMember()) return;
-
+    const { voice, createPlayerUI } = this.container.client.utils;
+    const permissions = voice(interaction);
     const queue = useQueue(interaction.guildId!);
+
     if (!queue)
       return interaction.reply({
         content: `I am not in a voice channel`,
         ephemeral: true,
       });
+
+    if (!permissions.checkClientToMember()) return;
+
     if (!queue.currentTrack)
       return interaction.reply({
         content: `There is no track **currently** playing`,
         ephemeral: true,
       });
+
+    await createPlayerUI(interaction.guildId!);
 
     queue.node.pause();
     return interaction.reply({
