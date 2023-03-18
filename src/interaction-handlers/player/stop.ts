@@ -34,7 +34,7 @@ export class ButtonHandler extends InteractionHandler {
     if (!voicePerms.checkMember()) return;
     if (!voicePerms.checkClientToMember()) return;
 
-    queue?.delete();
+    queue?.node.stop();
 
     await createPlayerUI(interaction.guildId!);
 

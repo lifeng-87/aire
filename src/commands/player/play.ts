@@ -144,7 +144,7 @@ export class UserCommand extends Command {
             },
             leaveOnEmptyCooldown: this.container.client.utils.second(30),
             leaveOnEmpty: true,
-            leaveOnEnd: false,
+            leaveOnEnd: true,
             bufferingTimeout: 0,
             selfDeaf: true,
           },

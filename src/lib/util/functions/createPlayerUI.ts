@@ -13,7 +13,7 @@ export async function createPlayerUI(guildId: string) {
 
   if (!queue?.currentTrack) {
     return await queue?.metadata.message.edit({
-      content: `All tracks play finish`,
+      content: `There is no track **currently** playing`,
       embeds: [],
       components: [],
     });
