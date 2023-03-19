@@ -1,45 +1,43 @@
-import { getDevGuildId } from "#utils/config";
-import { PaginatedMessage } from "@sapphire/discord.js-utilities";
-import { Command } from "@sapphire/framework";
+import {
+	InteractionHandler,
+	InteractionHandlerTypes,
+	PieceContext,
+} from "@sapphire/framework";
+import { ButtonInteraction, ButtonStyle, ComponentType } from "discord.js";
 import { useQueue } from "discord-player";
-import { ButtonStyle, ComponentType } from "discord.js";
+import { PaginatedMessage } from "@sapphire/discord.js-utilities";
 
-export class UserCommand extends Command {
-	public constructor(context: Command.Context, options: Command.Options) {
-		super(context, {
+export class ButtonHandler extends InteractionHandler {
+	public constructor(ctx: PieceContext, options: InteractionHandler.Options) {
+		super(ctx, {
 			...options,
-			description: "Displays the queue in an embed",
+			interactionHandlerType: InteractionHandlerTypes.Button,
 		});
 	}
 
-	public override async registerApplicationCommands(
-		registry: Command.Registry
-	) {
-		registry.registerChatInputCommand(
-			(command) => command.setName(this.name).setDescription(this.description),
-			{ guildIds: getDevGuildId() }
-		);
+	public override parse(interaction: ButtonInteraction) {
+		if (interaction.customId !== `@aire/player-button.${this.name}`)
+			return this.none();
+
+		return this.some();
 	}
 
-	public override async chatInputRun(
-		interaction: Command.ChatInputCommandInteraction
-	) {
-		const { voice } = this.container.client.utils;
-		const permissions = voice(interaction);
+	public async run(interaction: ButtonInteraction) {
+		const { voice, voiceButton, createPlayerUI } = this.container.client.utils;
+		const voicePerms = voice(interaction);
+		const btnPerms = voiceButton(interaction);
+
+		if (!btnPerms.checkMessage()) return;
+		if (!btnPerms.checkQueue()) return;
 
 		const queue = useQueue(interaction.guildId!);
+
+		if (!voicePerms.checkMember()) return;
+		if (!voicePerms.checkClientToMember()) return;
 
 		if (!queue)
 			return interaction.reply({
 				content: `I am **not** in a voice channel`,
-				ephemeral: true,
-			});
-
-		if (!permissions.checkClientToMember()) return;
-
-		if (!queue.tracks || !queue.currentTrack)
-			return interaction.reply({
-				content: `There is **no** queue to **display**`,
 				ephemeral: true,
 			});
 
@@ -128,6 +126,8 @@ export class UserCommand extends Command {
 				run: ({ handler }) => (handler.index = handler.pages.length - 1),
 			},
 		]);
+
+		await createPlayerUI(interaction.guildId!);
 
 		return paginatedMessage.run(interaction);
 	}

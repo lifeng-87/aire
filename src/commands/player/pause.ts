@@ -3,48 +3,51 @@ import { Command } from "@sapphire/framework";
 import { useQueue } from "discord-player";
 
 export class UserCommand extends Command {
-  public constructor(context: Command.Context, options: Command.Options) {
-    super(context, {
-      ...options,
-      description: "Pauses or resumes the current track",
-    });
-  }
+	public constructor(context: Command.Context, options: Command.Options) {
+		super(context, {
+			...options,
+			description: "Pauses or resumes the current track",
+		});
+	}
 
-  public override async registerApplicationCommands(
-    registry: Command.Registry
-  ) {
-    registry.registerChatInputCommand(
-      (command) => command.setName(this.name).setDescription(this.description),
-      { guildIds: getDevGuildId() }
-    );
-  }
+	public override async registerApplicationCommands(
+		registry: Command.Registry
+	) {
+		registry.registerChatInputCommand(
+			(command) => command.setName(this.name).setDescription(this.description),
+			{ guildIds: getDevGuildId() }
+		);
+	}
 
-  public override async chatInputRun(
-    interaction: Command.ChatInputCommandInteraction
-  ) {
-    const { voice, createPlayerUI } = this.container.client.utils;
-    const permissions = voice(interaction);
-    const queue = useQueue(interaction.guildId!);
+	public override async chatInputRun(
+		interaction: Command.ChatInputCommandInteraction
+	) {
+		const { voice, createPlayerUI, second } = this.container.client.utils;
+		const permissions = voice(interaction);
+		const queue = useQueue(interaction.guildId!);
 
-    if (!queue)
-      return interaction.reply({
-        content: `I am not in a voice channel`,
-        ephemeral: true,
-      });
+		if (!queue)
+			return interaction.reply({
+				content: `I am not in a voice channel`,
+				ephemeral: true,
+			});
 
-    if (!permissions.checkClientToMember()) return;
+		if (!permissions.checkClientToMember()) return;
 
-    if (!queue.currentTrack)
-      return interaction.reply({
-        content: `There is no track **currently** playing`,
-        ephemeral: true,
-      });
+		if (!queue.currentTrack)
+			return interaction.reply({
+				content: `There is no track **currently** playing`,
+				ephemeral: true,
+			});
 
-    await createPlayerUI(interaction.guildId!);
+		await createPlayerUI(interaction.guildId!);
 
-    queue.node.pause();
-    return interaction.reply({
-      content: `${this.container.client.utils.Emojis.Stop} | I have **stop** the track`,
-    });
-  }
+		queue.node.pause();
+		return interaction
+			.reply({
+				content: `${this.container.client.utils.Emojis.Stop} | I have **stop** the track`,
+				fetchReply: true,
+			})
+			.then((msg) => setTimeout(() => msg.delete(), second(10)));
+	}
 }
