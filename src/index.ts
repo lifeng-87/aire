@@ -1,4 +1,4 @@
-import { AireClient } from "#root/lib/extensions/AireClient";
+import { AireClient } from "#lib/structures/AireClient";
 import "#lib/setup";
 
 const client = new AireClient();
