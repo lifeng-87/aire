@@ -3,6 +3,7 @@
   "rules": {
     "@typescript-eslint/no-namespace": "off",
     "@typescript-eslint/no-throw-literal": "off",
+    "@typescript-eslint/require-await": "off",
     "prettier/prettier": 0
   }
 }
