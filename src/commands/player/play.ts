@@ -1,15 +1,9 @@
 import { Command } from "@sapphire/framework";
 import { s } from "@sapphire/shapeshift";
 import { useMasterPlayer } from "discord-player";
-import {
-	type TextChannel,
-	type GuildMember,
-	ButtonBuilder,
-	ActionRowBuilder,
-	ButtonStyle,
-} from "discord.js";
 import { getDevGuildId } from "#utils/config";
 import type { Metadata } from "#lib/types/GuildQueueMeta";
+import { ThreadAutoArchiveDuration, type GuildMember } from "discord.js";
 
 export class UserCommand extends Command {
 	public constructor(context: Command.Context, options: Command.Options) {
@@ -29,6 +23,7 @@ export class UserCommand extends Command {
 						opt
 							.setName("query")
 							.setDescription("A query of your choice")
+							.setRequired(true)
 							.setAutocomplete(true)
 					),
 			{ guildIds: getDevGuildId() }
@@ -72,27 +67,6 @@ export class UserCommand extends Command {
 		const player = useMasterPlayer();
 		const query = interaction.options.getString("query");
 
-		if (!query) {
-			const queue = player?.queues.get(interaction.guildId!);
-			if (!queue)
-				return interaction.reply({
-					content: `I am not in a voice channel`,
-					ephemeral: true,
-				});
-			if (!queue.currentTrack)
-				return interaction.reply({
-					content: `There is no track **currently** playing`,
-					ephemeral: true,
-				});
-
-			if (!permissions.checkClientToMember()) return;
-
-			queue.node.resume();
-			return interaction.reply({
-				content: `${this.container.client.utils.Emojis.Play} | **Playback** has been **resumed**`,
-			});
-		}
-
 		if (!permissions.checkClient()) return;
 		if (!permissions.checkMember()) return;
 		if (!permissions.checkClientToMember()) return;
@@ -107,52 +81,55 @@ export class UserCommand extends Command {
 				ephemeral: true,
 			});
 
-		const message = await interaction.deferReply({ fetchReply: true });
-
 		try {
 			const queue = player?.queues.get<Metadata>(interaction.guildId!);
 
-			if (queue) {
-				queue.metadata?.message.edit({
-					content: "There has new treak(s) enqueued!",
-					embeds: [],
-					components: [
-						new ActionRowBuilder<ButtonBuilder>().addComponents(
-							new ButtonBuilder()
-								.setStyle(ButtonStyle.Link)
-								.setURL(message.url)
-								.setLabel("Took me to the new controller")
-						),
-					],
+			if (!queue) {
+				const threadMsg = await interaction.deferReply({
+					fetchReply: true,
 				});
 
-				queue.setMetadata({
-					channel: interaction.channel as TextChannel,
-					message: message!,
+				const thread = await threadMsg.startThread({
+					name: "🎶 Player 🎶",
+					autoArchiveDuration: ThreadAutoArchiveDuration.OneHour,
 				});
 
-				await player?.play(member.voice.channel!.id, results);
-			} else {
+				const message = await thread.send("🎶 **Now playing** 🎶");
+
 				await player?.play(member.voice.channel!.id, results, {
 					nodeOptions: {
 						metadata: {
 							channel: interaction.channel!,
-							message: message!,
+							thread: thread!,
+							message,
 						},
 						leaveOnEmptyCooldown: this.container.client.utils.second(30),
 						leaveOnEmpty: true,
-						leaveOnEnd: true,
+						leaveOnEnd: false,
 						bufferingTimeout: 0,
 						selfDeaf: true,
 					},
 				});
+
+				return interaction.editReply({
+					content: "🎶 **Player Start** 🎶",
+				});
 			}
 
-			return interaction.editReply({
-				content: `🎶 **Playing** 🎶`,
-			});
+			await player?.play(member.voice.channel!.id, results);
+
+			return interaction
+				.reply({
+					content: `There has new treak(s) enqueued!`,
+				})
+				.then((interaction) =>
+					setTimeout(
+						() => interaction.delete(),
+						this.container.client.utils.second(10)
+					)
+				);
 		} catch (error) {
-			await message.edit({
+			await interaction.editReply({
 				content: `An **error** has occurred`,
 			});
 			return this.container.logger.error(error);

@@ -42,12 +42,20 @@ export class UserCommand extends Command {
 
 		await createPlayerUI(interaction.guildId!);
 
-		queue.node.pause();
+		if (queue.node.isPaused()) {
+			queue.node.resume();
+		} else {
+			queue.node.pause();
+		}
+
 		return interaction
 			.reply({
-				content: `${this.container.client.utils.Emojis.Stop} | I have **stop** the track`,
-				fetchReply: true,
+				content: `${this.container.client.utils.Emojis.Stop} | I have **${
+					queue.node.isPaused() ? "pause" : "resumed"
+				}** the track`,
 			})
-			.then((msg) => setTimeout(() => msg.delete(), second(10)));
+			.then((interaction) =>
+				setTimeout(() => interaction.delete(), second(10))
+			);
 	}
 }

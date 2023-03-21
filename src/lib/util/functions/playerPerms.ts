@@ -91,10 +91,13 @@ export function voiceButton(interaction: ButtonInteraction) {
 
 	const checkQueue = async () => {
 		if (!queue) {
-			await interaction.reply({
-				content: `I am not in a voice channel!`,
-				ephemeral: true,
-			});
+			if (interaction.message.channel.isThread()) {
+				await interaction.message.channel
+					.fetchStarterMessage()
+					.then((msg) => msg?.edit("✅ Finished playing!"));
+				await interaction.message.channel.delete();
+			}
+
 			return false;
 		}
 
@@ -103,11 +106,12 @@ export function voiceButton(interaction: ButtonInteraction) {
 
 	const checkMessage = async () => {
 		if (interaction.message.id !== queue?.metadata?.message.id) {
-			await interaction.message.edit({
-				content: "This controller is expired!",
-				embeds: [],
-				components: [],
-			});
+			if (interaction.message.channel.isThread()) {
+				await interaction.message.channel
+					.fetchStarterMessage()
+					.then((msg) => msg?.edit("✅ Finished playing!"));
+				await interaction.message.channel.delete();
+			}
 			return false;
 		}
 

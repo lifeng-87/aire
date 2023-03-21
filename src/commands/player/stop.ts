@@ -42,8 +42,9 @@ export class UserCommand extends Command {
 		return interaction
 			.reply({
 				content: `${this.container.client.utils.Emojis.Stop} | I have **stop** the queue`,
-				fetchReply: true,
 			})
-			.then((msg) => setTimeout(() => msg.delete(), second(10)));
+			.then((interaction) =>
+				setTimeout(() => interaction.delete(), second(10))
+			);
 	}
 }

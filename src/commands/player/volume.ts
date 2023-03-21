@@ -61,8 +61,9 @@ export class UserCommand extends Command {
 		return interaction
 			.reply({
 				content: `🔊 | I **changed** the volume to: **${queue?.node.volume}%**`,
-				fetchReply: true,
 			})
-			.then((msg) => setTimeout(() => msg.delete(), second(10)));
+			.then((interaction) =>
+				setTimeout(() => interaction.delete(), second(10))
+			);
 	}
 }

@@ -47,8 +47,9 @@ export class UserCommand extends Command {
 		return interaction
 			.reply({
 				content: `${Emojis.Skip} | I have **skipped** to the next track`,
-				fetchReply: true,
 			})
-			.then((msg) => setTimeout(() => msg.delete(), second(10)));
+			.then((interaction) =>
+				setTimeout(() => interaction.delete(), second(10))
+			);
 	}
 }

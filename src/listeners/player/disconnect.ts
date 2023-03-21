@@ -7,7 +7,7 @@ export class PlayListener extends Listener {
 	public constructor(context: Listener.Context, options: Listener.Options) {
 		super(context, {
 			...options,
-			event: "emptyQueue",
+			event: "disconnect",
 			emitter: container.client.player.events,
 		});
 	}
@@ -24,7 +24,11 @@ export class PlayListener extends Listener {
 			.missing(resolved);
 		if (missingPerms?.length) return;
 
-		await this.container.client.utils.createPlayerUI(queue.guild.id);
+		const { thread } = queue.metadata;
+
+		const message = await thread.fetchStarterMessage();
+		message?.edit("✅ Finished playing!");
+		await thread.delete();
 
 		/*	queue.setMetadata({ channel: queue.metadata!.channel, message: message! });*/
 	}

@@ -11,50 +11,50 @@ import type { Metadata } from "#root/lib/types/GuildQueueMeta";
 export async function createPlayerUI(guildId: string) {
 	const queue = useQueue<Metadata>(guildId);
 
-	if (!queue?.currentTrack) {
-		return queue?.metadata?.message.edit({
-			content: `There is no track **currently** playing`,
-			embeds: [],
-			components: [],
-		});
-	}
+	const embed = new EmbedBuilder();
 
-	const next = queue.tracks.at(0);
+	if (queue?.currentTrack) {
+		const next = queue.tracks.at(0);
 
-	const embed = new EmbedBuilder()
-		.setTitle(queue.currentTrack!.title!)
-		.setURL(queue.currentTrack!.url!)
-		.setThumbnail(queue.currentTrack!.thumbnail!)
-		.setDescription(`Requset by: ${queue.currentTrack?.requestedBy}`)
-		.addFields({
-			name: "Progress",
-			value: `${
-				queue.node.getTimestamp()?.current.label
-			} >${queue.node.createProgressBar({
-				timecodes: false,
-				queue: false,
-			})}< ${queue.node.getTimestamp()?.total.label}`,
-		})
-		.setFooter({
-			text: `${queue.tracks.size} track(s) in queue`,
-		})
-		.setTimestamp();
+		embed
+			.setTitle(queue.currentTrack!.title!)
+			.setURL(queue.currentTrack!.url!)
+			.setThumbnail(queue.currentTrack!.thumbnail!)
+			.setDescription(`Requset by: ${queue.currentTrack?.requestedBy}`)
+			.addFields({
+				name: "Progress",
+				value: `${
+					queue.node.getTimestamp()?.current.label
+				} >${queue.node.createProgressBar({
+					timecodes: false,
+					queue: false,
+				})}< ${queue.node.getTimestamp()?.total.label}`,
+			})
+			.setFooter({
+				text: `${queue.tracks.size} track(s) in queue`,
+			})
+			.setTimestamp();
 
-	if (next) {
-		embed.addFields({
-			name: "Next track",
-			value: `[\`${next?.title}\`](${next?.url})\nRequset by: ${next?.requestedBy}`,
-		});
+		if (next) {
+			embed.addFields({
+				name: "Next track",
+				value: `[\`${next?.title}\`](${next?.url})\nRequset by: ${next?.requestedBy}`,
+			});
+		}
+	} else {
+		embed
+			.setTitle(`There is no track **currently** playing`)
+			.setImage("https://tenor.com/view/stick-bug-rick-roll-lol-gif-18118062");
 	}
 
 	const row1 = new ActionRowBuilder<ButtonBuilder>().addComponents(
 		new ButtonBuilder()
 			.setCustomId(
-				queue.node.isPlaying()
+				queue?.node.isPlaying()
 					? "@aire/player-button.pause"
 					: "@aire/player-button.resume"
 			)
-			.setEmoji(queue.node.isPlaying() ? Emojis.Pause : Emojis.Play)
+			.setEmoji(queue?.node.isPlaying() ? Emojis.Pause : Emojis.Play)
 			.setStyle(ButtonStyle.Secondary),
 		new ButtonBuilder()
 			.setCustomId("@aire/player-button.skip")
@@ -66,7 +66,7 @@ export async function createPlayerUI(guildId: string) {
 			.setStyle(ButtonStyle.Secondary),
 		new ButtonBuilder()
 			.setCustomId("@aire/player-button.repeat")
-			.setLabel(["Off", "Track", "Queue", "Auto Play"][queue.repeatMode])
+			.setLabel(["Off", "Track", "Queue", "Auto Play"][queue?.repeatMode || 0])
 			.setEmoji(Emojis.Repeat)
 			.setStyle(ButtonStyle.Secondary),
 		new ButtonBuilder()
@@ -88,7 +88,7 @@ export async function createPlayerUI(guildId: string) {
 			.setStyle(ButtonStyle.Primary)
 	);
 
-	return queue.metadata!.message.edit({
+	return queue?.metadata!.message.edit({
 		embeds: [embed],
 		components: [row1, row2],
 	});

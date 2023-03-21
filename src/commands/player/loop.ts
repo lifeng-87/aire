@@ -68,8 +68,9 @@ export class LoopCommand extends Command {
 				content: `**${name}** has been **${
 					mode === queue.repeatMode ? "enabled" : "disabled"
 				}**`,
-				fetchReply: true,
 			})
-			.then((msg) => setTimeout(() => msg.delete(), second(10)));
+			.then((interaction) =>
+				setTimeout(() => interaction.delete(), second(10))
+			);
 	}
 }
