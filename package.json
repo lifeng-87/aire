@@ -38,6 +38,7 @@
     "@sapphire/plugin-subcommands": "next",
     "@sapphire/shapeshift": "^3.8.1",
     "@skyra/env-utilities": "^1.1.0",
+    "canvas": "^2.11.0",
     "discord-api-types": "^0.37.35",
     "discord-player": "^6.1.0",
     "discord.js": "^14.7.1",
