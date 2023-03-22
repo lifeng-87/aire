@@ -1,10 +1,15 @@
 FROM node
 
-RUN apt-get update && \
-  apt-get install -y python3 build-essential && \
-  apt-get purge -y --auto-remove && \
+RUN mkdir ./fonts
 
-  COPY package.json ./
+RUN apt-get update && \
+  apt-get install -y python3 build-essential unzip && \
+  apt-get purge -y --auto-remove && \
+  RUN wget https://fonts.google.com/download?family=Noto%20Sans%20TC -O noto.zip && \
+  unzip -d ./fonts/ ./noto.zip && \
+  rm ./noto.zip
+
+COPY package.json ./
 
 RUN npm install -g yarn typescript && \
   yarn install
