@@ -11,8 +11,8 @@ RUN apt-get update && \
 
 COPY package.json ./
 
-RUN npm install -g yarn typescript && \
-  yarn install
+RUN npm install -g yarn typescript
+RUN yarn install
 
 COPY . .
 
