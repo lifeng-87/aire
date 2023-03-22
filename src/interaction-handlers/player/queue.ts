@@ -6,6 +6,7 @@ import {
 import { ButtonInteraction, ButtonStyle, ComponentType } from "discord.js";
 import { useQueue } from "discord-player";
 import { PaginatedMessage } from "@sapphire/discord.js-utilities";
+import type { QueueMetadata } from "#root/lib/types/GuildQueueMeta";
 
 export class ButtonHandler extends InteractionHandler {
 	public constructor(ctx: PieceContext, options: InteractionHandler.Options) {
@@ -30,7 +31,7 @@ export class ButtonHandler extends InteractionHandler {
 		if (!btnPerms.checkMessage()) return;
 		if (!btnPerms.checkQueue()) return;
 
-		const queue = useQueue(interaction.guildId!);
+		const queue = useQueue<QueueMetadata>(interaction.guildId!);
 
 		if (!voicePerms.checkMember()) return;
 		if (!voicePerms.checkClientToMember()) return;
@@ -127,7 +128,12 @@ export class ButtonHandler extends InteractionHandler {
 			},
 		]);
 
-		await createPlayerUI(interaction.guildId!);
+		const { embeds, components } = createPlayerUI(interaction.guildId!);
+
+		await queue.metadata?.message.edit({
+			embeds: embeds(),
+			components: components(),
+		});
 
 		return paginatedMessage.run(interaction);
 	}

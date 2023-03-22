@@ -1,3 +1,4 @@
+import type { QueueMetadata } from "#lib/types/GuildQueueMeta";
 import { getDevGuildId } from "#utils/config";
 import { Command } from "@sapphire/framework";
 import { useQueue } from "discord-player";
@@ -26,7 +27,7 @@ export class UserCommand extends Command {
 			this.container.client.utils;
 		const permissions = voice(interaction);
 
-		const queue = useQueue(interaction.guildId!);
+		const queue = useQueue<QueueMetadata>(interaction.guildId!);
 		if (!queue)
 			return interaction.reply({
 				content: `I am not in a voice channel`,
@@ -43,13 +44,18 @@ export class UserCommand extends Command {
 
 		queue.node.skip();
 
-		await createPlayerUI(interaction.guildId!);
+		const { embeds, components } = createPlayerUI(interaction.guildId!);
+
+		await queue.metadata?.message.edit({
+			embeds: embeds(),
+			components: components(),
+		});
+
 		return interaction
 			.reply({
 				content: `${Emojis.Skip} | I have **skipped** to the next track`,
+				fetchReply: true,
 			})
-			.then((interaction) =>
-				setTimeout(() => interaction.delete(), second(10))
-			);
+			.then((msg) => setTimeout(() => msg.delete(), second(10)));
 	}
 }

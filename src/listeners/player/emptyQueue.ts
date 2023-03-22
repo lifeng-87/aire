@@ -1,7 +1,7 @@
-import type { Metadata } from "#lib/types/GuildQueueMeta";
+import type { QueueMetadata } from "#lib/types/GuildQueueMeta";
 import { Listener, container } from "@sapphire/framework";
-import { GuildQueue } from "discord-player";
-import { PermissionsBitField } from "discord.js";
+import { GuildQueue, QueueRepeatMode } from "discord-player";
+import { EmbedBuilder, PermissionsBitField } from "discord.js";
 
 export class PlayListener extends Listener {
 	public constructor(context: Listener.Context, options: Listener.Options) {
@@ -12,7 +12,7 @@ export class PlayListener extends Listener {
 		});
 	}
 
-	public async run(queue: GuildQueue<Metadata>) {
+	public async run(queue: GuildQueue<QueueMetadata>) {
 		if (!queue.currentTrack) return;
 
 		const resolved = new PermissionsBitField([
@@ -24,7 +24,21 @@ export class PlayListener extends Listener {
 			.missing(resolved);
 		if (missingPerms?.length) return;
 
-		await this.container.client.utils.createPlayerUI(queue.guild.id);
+		const { components } = this.container.client.utils.createPlayerUI(
+			queue.guild.id
+		);
+
+		if (queue.repeatMode === QueueRepeatMode.OFF)
+			queue.metadata?.message.edit({
+				embeds: [
+					new EmbedBuilder()
+						.setTitle(`There is no track **currently** playing`)
+						.setImage(
+							"https://media.tenor.com/kGekz062mwgAAAAd/hugs-rickroll.gif"
+						),
+				],
+				components: components(),
+			});
 
 		/*	queue.setMetadata({ channel: queue.metadata!.channel, message: message! });*/
 	}

@@ -1,4 +1,4 @@
-import type { Metadata } from "#root/lib/types/GuildQueueMeta";
+import type { QueueMetadata } from "#root/lib/types/GuildQueueMeta";
 import { isGuildMember } from "@sapphire/discord.js-utilities";
 import { container } from "@sapphire/framework";
 import { useQueue } from "discord-player";
@@ -87,16 +87,15 @@ export function voice(
 }
 
 export function voiceButton(interaction: ButtonInteraction) {
-	const queue = useQueue<Metadata>(interaction.guildId!);
+	const queue = useQueue<QueueMetadata>(interaction.guildId!);
 
 	const checkQueue = async () => {
 		if (!queue) {
-			if (interaction.message.channel.isThread()) {
-				await interaction.message.channel
-					.fetchStarterMessage()
-					.then((msg) => msg?.edit("✅ Finished playing!"));
-				await interaction.message.channel.delete();
-			}
+			await interaction.message.edit({
+				content: "✅ Finished playing!",
+				embeds: [],
+				components: [],
+			});
 
 			return false;
 		}
@@ -106,12 +105,12 @@ export function voiceButton(interaction: ButtonInteraction) {
 
 	const checkMessage = async () => {
 		if (interaction.message.id !== queue?.metadata?.message.id) {
-			if (interaction.message.channel.isThread()) {
-				await interaction.message.channel
-					.fetchStarterMessage()
-					.then((msg) => msg?.edit("✅ Finished playing!"));
-				await interaction.message.channel.delete();
-			}
+			await interaction.message.edit({
+				content: "✅ Finished playing!",
+				embeds: [],
+				components: [],
+			});
+
 			return false;
 		}
 

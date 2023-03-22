@@ -5,6 +5,7 @@ import {
 } from "@sapphire/framework";
 import { ButtonInteraction } from "discord.js";
 import { useQueue } from "discord-player";
+import type { QueueMetadata } from "#lib/types/GuildQueueMeta";
 
 export class ButtonHandler extends InteractionHandler {
 	public constructor(ctx: PieceContext, options: InteractionHandler.Options) {
@@ -29,14 +30,19 @@ export class ButtonHandler extends InteractionHandler {
 		if (!btnPerms.checkMessage()) return;
 		if (!btnPerms.checkQueue()) return;
 
-		const queue = useQueue(interaction.guildId!);
+		const queue = useQueue<QueueMetadata>(interaction.guildId!);
 
 		if (!voicePerms.checkMember()) return;
 		if (!voicePerms.checkClientToMember()) return;
 
 		queue?.setRepeatMode(queue.repeatMode === 3 ? 0 : queue.repeatMode + 1);
 
-		await createPlayerUI(interaction.guildId!);
+		const { embeds, components } = createPlayerUI(interaction.guildId!);
+
+		await queue?.metadata?.message.edit({
+			embeds: embeds(),
+			components: components(),
+		});
 
 		return interaction.deferUpdate();
 	}

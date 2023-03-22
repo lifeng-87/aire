@@ -2,8 +2,7 @@ import { Command } from "@sapphire/framework";
 import { s } from "@sapphire/shapeshift";
 import { useMasterPlayer } from "discord-player";
 import { getDevGuildId } from "#utils/config";
-import type { Metadata } from "#lib/types/GuildQueueMeta";
-import { ThreadAutoArchiveDuration, type GuildMember } from "discord.js";
+import type { QueueMetadata } from "#lib/types/GuildQueueMeta";
 
 export class UserCommand extends Command {
 	public constructor(context: Command.Context, options: Command.Options) {
@@ -60,7 +59,7 @@ export class UserCommand extends Command {
 	}
 
 	public override async chatInputRun(
-		interaction: Command.ChatInputCommandInteraction
+		interaction: Command.ChatInputCommandInteraction<"cached">
 	) {
 		const { voice } = this.container.client.utils;
 		const permissions = voice(interaction);
@@ -71,7 +70,7 @@ export class UserCommand extends Command {
 		if (!permissions.checkMember()) return;
 		if (!permissions.checkClientToMember()) return;
 
-		const member = interaction.member as GuildMember;
+		const { member, channel } = interaction;
 
 		const results = (await player!.search(query!)).setRequestedBy(member.user);
 
@@ -82,25 +81,17 @@ export class UserCommand extends Command {
 			});
 
 		try {
-			const queue = player?.queues.get<Metadata>(interaction.guildId!);
+			const queue = player?.queues.get<QueueMetadata>(interaction.guildId!);
 
 			if (!queue) {
-				const threadMsg = await interaction.deferReply({
+				const message = await interaction.deferReply({
 					fetchReply: true,
 				});
 
-				const thread = await threadMsg.startThread({
-					name: "🎶 Player 🎶",
-					autoArchiveDuration: ThreadAutoArchiveDuration.OneHour,
-				});
-
-				const message = await thread.send("🎶 **Now playing** 🎶");
-
-				await player?.play(member.voice.channel!.id, results, {
+				void player?.play<QueueMetadata>(member.voice.channel!.id, results, {
 					nodeOptions: {
 						metadata: {
-							channel: interaction.channel!,
-							thread: thread!,
+							channel: channel!,
 							message,
 						},
 						leaveOnEmptyCooldown: this.container.client.utils.second(30),
@@ -112,7 +103,7 @@ export class UserCommand extends Command {
 				});
 
 				return interaction.editReply({
-					content: "🎶 **Player Start** 🎶",
+					content: "🎶 **Now playing** 🎶",
 				});
 			}
 
@@ -121,17 +112,22 @@ export class UserCommand extends Command {
 			return interaction
 				.reply({
 					content: `There has new treak(s) enqueued!`,
+					fetchReply: true,
 				})
-				.then((interaction) =>
-					setTimeout(
-						() => interaction.delete(),
-						this.container.client.utils.second(10)
-					)
+				.then((msg) =>
+					setTimeout(() => msg.delete(), this.container.client.utils.second(10))
 				);
 		} catch (error) {
-			await interaction.editReply({
-				content: `An **error** has occurred`,
-			});
+			if (interaction.deferred) {
+				await interaction.editReply({
+					content: `An **error** has occurred`,
+				});
+			} else {
+				await interaction.reply({
+					content: `An **error** has occurred`,
+				});
+			}
+
 			return this.container.logger.error(error);
 		}
 	}

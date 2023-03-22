@@ -1,3 +1,4 @@
+import type { QueueMetadata } from "#lib/types/GuildQueueMeta";
 import { getDevGuildId } from "#utils/config";
 import { Command } from "@sapphire/framework";
 import { QueueRepeatMode, useQueue } from "discord-player";
@@ -35,10 +36,10 @@ export class LoopCommand extends Command {
 	}
 
 	public override async chatInputRun(
-		interaction: Command.ChatInputCommandInteraction
+		interaction: Command.ChatInputCommandInteraction<"cached">
 	) {
 		const { voice, createPlayerUI, second } = this.container.client.utils;
-		const queue = useQueue(interaction.guild!.id);
+		const queue = useQueue<QueueMetadata>(interaction.guild!.id);
 		const permissions = voice(interaction);
 
 		if (!queue)
@@ -61,16 +62,20 @@ export class LoopCommand extends Command {
 
 		queue.setRepeatMode(mode as QueueRepeatMode);
 
-		await createPlayerUI(interaction.guildId!);
+		const { embeds, components } = createPlayerUI(interaction.guildId!);
+
+		await queue.metadata?.message.edit({
+			embeds: embeds(),
+			components: components(),
+		});
 
 		return interaction
 			.reply({
 				content: `**${name}** has been **${
 					mode === queue.repeatMode ? "enabled" : "disabled"
 				}**`,
+				fetchReply: true,
 			})
-			.then((interaction) =>
-				setTimeout(() => interaction.delete(), second(10))
-			);
+			.then((msg) => setTimeout(() => msg.delete(), second(10)));
 	}
 }

@@ -1,7 +1,7 @@
 import { Listener, container } from "@sapphire/framework";
 import { GuildQueue } from "discord-player";
 import { PermissionsBitField } from "discord.js";
-import type { Metadata } from "#lib/types/GuildQueueMeta";
+import type { QueueMetadata } from "#lib/types/GuildQueueMeta";
 
 export class PlayListener extends Listener {
 	public constructor(context: Listener.Context, options: Listener.Options) {
@@ -12,7 +12,7 @@ export class PlayListener extends Listener {
 		});
 	}
 
-	public async run(queue: GuildQueue<Metadata>) {
+	public async run(queue: GuildQueue<QueueMetadata>) {
 		const resolved = new PermissionsBitField([
 			PermissionsBitField.Flags.SendMessages,
 			PermissionsBitField.Flags.ViewChannel,
@@ -22,7 +22,14 @@ export class PlayListener extends Listener {
 			.missing(resolved);
 		if (missingPerms?.length) return;
 
-		await this.container.client.utils.createPlayerUI(queue.guild.id);
+		const { embeds, components } = this.container.client.utils.createPlayerUI(
+			queue.guild.id
+		);
+
+		queue.metadata?.message.edit({
+			embeds: embeds(),
+			components: components(),
+		});
 
 		/*	queue.setMetadata({ channel: queue.metadata!.channel, message: message! });*/
 	}

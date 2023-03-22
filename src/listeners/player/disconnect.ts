@@ -1,4 +1,4 @@
-import type { Metadata } from "#lib/types/GuildQueueMeta";
+import type { QueueMetadata } from "#lib/types/GuildQueueMeta";
 import { Listener, container } from "@sapphire/framework";
 import { GuildQueue } from "discord-player";
 import { PermissionsBitField } from "discord.js";
@@ -12,7 +12,7 @@ export class PlayListener extends Listener {
 		});
 	}
 
-	public async run(queue: GuildQueue<Metadata>) {
+	public async run(queue: GuildQueue<QueueMetadata>) {
 		if (!queue.currentTrack) return;
 
 		const resolved = new PermissionsBitField([
@@ -24,11 +24,7 @@ export class PlayListener extends Listener {
 			.missing(resolved);
 		if (missingPerms?.length) return;
 
-		const { thread } = queue.metadata;
-
-		const message = await thread.fetchStarterMessage();
-		message?.edit("✅ Finished playing!");
-		await thread.delete();
+		await queue.metadata?.message?.edit("✅ Finished playing!");
 
 		/*	queue.setMetadata({ channel: queue.metadata!.channel, message: message! });*/
 	}

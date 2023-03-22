@@ -1,7 +1,6 @@
-import { Message, TextChannel, ThreadChannel } from "discord.js";
+import { Message, GuildTextBasedChannel } from "discord.js";
 
-export interface Metadata {
+export interface QueueMetadata {
 	message: Message;
-	thread: ThreadChannel;
-	channel: TextChannel;
+	channel: GuildTextBasedChannel;
 }
