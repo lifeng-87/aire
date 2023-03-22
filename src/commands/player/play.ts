@@ -30,7 +30,7 @@ export class UserCommand extends Command {
 	}
 
 	public override async autocompleteRun(
-		interaction: Command.AutocompleteInteraction
+		interaction: Command.AutocompleteInteraction<"cached">
 	) {
 		const player = useMasterPlayer();
 		const query = interaction.options.getString("query");

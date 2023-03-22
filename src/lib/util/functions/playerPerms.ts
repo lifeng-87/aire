@@ -30,57 +30,54 @@ export function voice(
 		const missingPerms = member.voice.channel
 			?.permissionsFor(interaction.guild!.members.me!)
 			.missing(resolved);
-		if (missingPerms?.length) {
-			const content = `I am **missing** the required voice channel permissions: \`${missingPerms.join(
-				", "
-			)}\``;
+		if (!missingPerms?.length) return true;
 
-			if (interaction.deferred) {
-				await interaction.editReply({
-					content,
-				});
-			} else {
-				await interaction.reply({
-					content,
-					ephemeral: true,
-				});
-			}
+		const content = `I am **missing** the required voice channel permissions: \`${missingPerms.join(
+			", "
+		)}\``;
 
-			return false;
+		if (interaction.deferred) {
+			await interaction.editReply({
+				content,
+			});
+		} else {
+			await interaction.reply({
+				content,
+				ephemeral: true,
+			});
 		}
 
-		return true;
+		return false;
 	};
 
 	const checkMember = async () => {
-		if (!member.voice.channel) {
-			const content = `You **need** to be in a voice channel.`;
-			if (interaction.deferred) {
-				await interaction.editReply({ content });
-			} else {
-				await interaction.reply({ content, ephemeral: true });
-			}
-			return false;
+		if (member.voice.channel) return true;
+
+		const content = `You **need** to be in a voice channel.`;
+		if (interaction.deferred) {
+			await interaction.editReply({ content });
+		} else {
+			await interaction.reply({ content, ephemeral: true });
 		}
-		return true;
+		return false;
 	};
 
 	const checkClientToMember = async () => {
 		if (
-			interaction.guild?.members.me?.voice.channelId &&
-			member.voice.channelId !== interaction.guild?.members.me?.voice.channelId
-		) {
-			const content = `You are **not** in my voice channel`;
-			if (interaction.deferred) {
-				await interaction.editReply({ content });
-			} else {
-				await interaction.reply({ content, ephemeral: true });
-			}
+			(interaction.guild?.members.me?.voice.channelId &&
+				member.voice.channelId) ===
+			interaction.guild?.members.me?.voice.channelId
+		)
+			return true;
 
-			return false;
+		const content = `You are **not** in my voice channel`;
+		if (interaction.deferred) {
+			await interaction.editReply({ content });
+		} else {
+			await interaction.reply({ content, ephemeral: true });
 		}
 
-		return true;
+		return false;
 	};
 
 	return { checkClient, checkClientToMember, checkMember };
@@ -90,31 +87,27 @@ export function voiceButton(interaction: ButtonInteraction) {
 	const queue = useQueue<QueueMetadata>(interaction.guildId!);
 
 	const checkQueue = async () => {
-		if (!queue) {
-			await interaction.message.edit({
-				content: "✅ Finished playing!",
-				embeds: [],
-				components: [],
-			});
+		if (queue) return true;
 
-			return false;
-		}
+		await interaction.message.edit({
+			content: "✅ Finished playing!",
+			embeds: [],
+			components: [],
+		});
 
-		return true;
+		return false;
 	};
 
 	const checkMessage = async () => {
-		if (interaction.message.id !== queue?.metadata?.message.id) {
-			await interaction.message.edit({
-				content: "✅ Finished playing!",
-				embeds: [],
-				components: [],
-			});
+		if (interaction.message.id === queue?.metadata?.message.id) return true;
 
-			return false;
-		}
+		await interaction.message.edit({
+			content: "✅ Finished playing!",
+			embeds: [],
+			components: [],
+		});
 
-		return true;
+		return false;
 	};
 
 	return { checkQueue, checkMessage };
