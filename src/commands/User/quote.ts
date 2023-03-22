@@ -45,14 +45,14 @@ export class UserCommand extends Command {
 		const { body } = await request(displayAvatarURL);
 		const avatar = await loadImage(await body.arrayBuffer());
 
-		const canvas = createCanvas(avatar.width * 2.5, avatar.width);
+		const canvas = createCanvas(512 * 2.5, 512);
 		const ctx = canvas.getContext("2d");
 
 		ctx.fillStyle = "black";
-		ctx.fillRect(avatar.width, 0, canvas.width - avatar.width, canvas.height);
-		ctx.drawImage(avatar, 0, 0, avatar.width, canvas.height);
+		ctx.fillRect(512, 0, canvas.width - 512, canvas.height);
+		ctx.drawImage(avatar, 0, 0, 512, canvas.height);
 
-		const imgArrData = ctx.getImageData(0, 0, avatar.width, avatar.height);
+		const imgArrData = ctx.getImageData(0, 0, 512, 512);
 		for (let i = 0; i < imgArrData.data.length; i += 4) {
 			const r = imgArrData.data[i];
 			const g = imgArrData.data[i + 1];
@@ -67,19 +67,14 @@ export class UserCommand extends Command {
 
 		ctx.putImageData(imgArrData, 0, 0);
 
-		const grdWidth = avatar.width * 0.2;
-		const grd = ctx.createLinearGradient(
-			avatar.width - grdWidth,
-			0,
-			avatar.width,
-			0
-		);
+		const grdWidth = 512 * 0.2;
+		const grd = ctx.createLinearGradient(512 - grdWidth, 0, 512, 0);
 		grd.addColorStop(0, "rgba(0, 0, 0, 0)");
 		grd.addColorStop(0.3, "rgba(0, 0, 0, 0.2)");
 		grd.addColorStop(1, "black");
 
 		ctx.fillStyle = grd;
-		ctx.fillRect(avatar.width - grdWidth, 0, grdWidth, avatar.height);
+		ctx.fillRect(512 - grdWidth, 0, grdWidth, 512);
 
 		const textH = 50;
 		const maxLines = 3;
@@ -102,9 +97,9 @@ export class UserCommand extends Command {
 		warpedText.slice(0, maxLines).forEach((s) => {
 			ctx.fillText(
 				s,
-				avatar.width + (canvas.width - avatar.width) / 2,
+				512 + (canvas.width - 512) / 2,
 				y,
-				canvas.width - avatar.width - 100
+				canvas.width - 512 - 100
 			);
 
 			y += textH;
@@ -117,7 +112,7 @@ export class UserCommand extends Command {
 			`- ${authorName}`,
 			canvas.width - 60,
 			canvas.height - 60,
-			canvas.width - avatar.width - 100
+			canvas.width - 512 - 100
 		);
 
 		const attachment = new AttachmentBuilder(await canvas.encode("png"), {
