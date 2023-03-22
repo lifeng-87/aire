@@ -87,7 +87,7 @@ export class UserCommand extends Command {
 		ctx.font = `blod ${textH}px NotoSansTC`;
 		ctx.fillStyle = "white";
 
-		const warpedText = warpText(content, 15);
+		const warpedText = warpText(content, 20);
 
 		if (warpedText.length > maxLines)
 			warpedText[maxLines - 1] = `${warpedText[maxLines - 1].slice(
