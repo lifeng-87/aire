@@ -11,6 +11,6 @@ process.env.NODE_ENV ??= "development";
 inspect.defaultOptions.depth = 1;
 
 GlobalFonts.registerFromPath(
-	join(mainFolder, "fonts", "NotoSansTC.otf"),
+	join(mainFolder, "fonts", "NotoSansTC-Black.otf"),
 	"NotoSansTC"
 );
