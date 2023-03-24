@@ -166,7 +166,7 @@ export class UserCommand extends Command {
 
 			let fontSzie = 50;
 
-			ctx.textAlign = "center";
+			ctx.textAlign = "left";
 			ctx.textBaseline = "middle";
 			ctx.font = `bold ${fontSzie}px ${fontfamily}`;
 			ctx.fillStyle = "white";
@@ -188,7 +188,7 @@ export class UserCommand extends Command {
 
 			const warpedText: string[] = [];
 			content
-				.replace("\r\n", "\n")
+				.replace(/\r\n/, "\n")
 				.split("\n")
 				.forEach((line) => {
 					warpText(line, textMaxWidth).forEach((text) => {
@@ -207,11 +207,7 @@ export class UserCommand extends Command {
 				10;
 
 			warpedText.slice(0, maxLine).forEach(async (line, i) => {
-				ctx.fillText(
-					line,
-					avatarWidth + (canvas.width - avatarWidth) / 2,
-					yStart + (fontSzie + 5) * i
-				);
+				ctx.fillText(line, avatarWidth + 50, yStart + (fontSzie + 5) * i);
 			});
 
 			ctx.textAlign = "end";
