@@ -1,21 +1,12 @@
-import {
-	ApplicationCommandRegistries,
-	BucketScope,
-	LogLevel,
-	RegisterBehavior,
-} from "@sapphire/framework";
+import { BucketScope, LogLevel } from "@sapphire/framework";
 import { envParseArray, envParseString, setup } from "@skyra/env-utilities";
 import { GatewayIntentBits } from "discord.js";
-import { second } from "#utils/common";
-import { join } from "path";
-import { mainFolder } from "#utils/constants";
+import { second } from "#utils/common/index";
 import type { Config } from "#lib/types/Config";
+import { mainFolder } from "#utils/constants";
+import { join } from "node:path";
 
 setup({ path: join(mainFolder, ".env") });
-
-ApplicationCommandRegistries.setDefaultBehaviorWhenNotIdentical(
-	RegisterBehavior.BulkOverwrite
-);
 
 const ownersId = envParseArray("OWNERS_ID");
 const discordToken = envParseString("DISCORD_TOKEN");

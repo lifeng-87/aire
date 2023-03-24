@@ -33,6 +33,6 @@
     "**/*.json"
   ],
   "exclude": [
-    "./tsconfig.json"
+    "./tsconfig.json",
   ]
 }
