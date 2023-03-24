@@ -3,16 +3,12 @@ FROM node
 RUN mkdir ./fonts
 
 RUN apt-get update && \
-  apt-get install -y python3 build-essential unzip && \
-  apt-get purge -y --auto-remove && \
-  wget https://fonts.google.com/download?family=Noto%20Sans%20TC -O noto.zip && \
-  unzip -d ./fonts/ ./noto.zip && \
-  rm ./noto.zip
+  apt-get install -y python3 build-essential unzip fonts-noto && \
+  apt-get purge -y --auto-remove
 
 COPY package.json ./
 
-RUN npm install -g npm@latest typescript
-RUN yarn install
+RUN npm install -g npm@latest typescript && yarn install
 
 COPY . .
 

@@ -6,10 +6,12 @@ import {
 	RegisterBehavior,
 } from "@sapphire/framework";
 import { inspect } from "node:util";
+/*
 import { registerFont } from "canvas";
 import { readdirSync } from "node:fs";
 import { mainFolder } from "./util";
 import { join } from "node:path";
+*/
 
 process.env.NODE_ENV ??= "development";
 
@@ -19,6 +21,7 @@ ApplicationCommandRegistries.setDefaultBehaviorWhenNotIdentical(
 	RegisterBehavior.BulkOverwrite
 );
 
+/*
 const fontDir = join(mainFolder, "fonts");
 const fontFiles = readdirSync(fontDir);
 fontFiles.forEach((fontFile) => {
@@ -26,3 +29,4 @@ fontFiles.forEach((fontFile) => {
 	registerFont(join(fontDir, fontFile), { family: fontName });
 	console.log(join(fontDir, fontFile), fontName);
 });
+*/
