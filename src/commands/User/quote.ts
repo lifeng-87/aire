@@ -171,13 +171,16 @@ export class UserCommand extends Command {
 			ctx.font = `bold ${fontSzie}px ${fontfamily}`;
 			ctx.fillStyle = "white";
 
-			const textMaxMetrics = ctx.measureText(content.replace(/\r|\n/, ""));
-			let maxLine = Math.ceil(textMaxMetrics.width / textMaxWidth);
+			let maxLine = 0;
 			let isOutOfMax = false;
+			content.split(/\r\n|\n/).forEach((line) => {
+				const textMaxMetrics = ctx.measureText(line);
+				maxLine += Math.ceil(textMaxMetrics.width / textMaxWidth);
+			});
 
 			while (maxLine * fontSzie + 5 > textMaxHeight) {
 				fontSzie -= 1;
-				if (fontSzie <= 28) {
+				if (fontSzie <= 30) {
 					maxLine = 10;
 					isOutOfMax = true;
 					break;
@@ -187,14 +190,11 @@ export class UserCommand extends Command {
 			ctx.font = `bold ${fontSzie}px ${fontfamily}`;
 
 			const warpedText: string[] = [];
-			content
-				.replace(/\r\n/, "\n")
-				.split("\n")
-				.forEach((line) => {
-					warpText(line, textMaxWidth).forEach((text) => {
-						warpedText.push(text);
-					});
+			content.split(/\r\n|\n/).forEach((line) => {
+				warpText(line, textMaxWidth).forEach((text) => {
+					warpedText.push(text);
 				});
+			});
 
 			if (isOutOfMax)
 				warpedText[maxLine - 1] = `${warpedText[maxLine - 1].substring(
@@ -204,7 +204,7 @@ export class UserCommand extends Command {
 
 			let x = avatarWidth + (canvas.width - avatarWidth) / 2;
 
-			if (maxLine > 3) {
+			if (maxLine > 5) {
 				ctx.textAlign = "left";
 				x = avatarWidth + 50;
 			}
