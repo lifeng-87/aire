@@ -166,7 +166,7 @@ export class UserCommand extends Command {
 
 			let fontSzie = 50;
 
-			ctx.textAlign = "left";
+			ctx.textAlign = "center";
 			ctx.textBaseline = "middle";
 			ctx.font = `bold ${fontSzie}px ${fontfamily}`;
 			ctx.fillStyle = "white";
@@ -202,12 +202,19 @@ export class UserCommand extends Command {
 					warpedText[maxLine - 1].length - 3
 				)}...`;
 
+			let x = avatarWidth + (canvas.width - avatarWidth) / 2;
+
+			if (maxLine > 3) {
+				ctx.textAlign = "left";
+				x = avatarWidth + 50;
+			}
+
 			const yStart =
 				(canvas.height - warpedText.slice(0, maxLine).length * fontSzie) / 2 -
 				10;
 
 			warpedText.slice(0, maxLine).forEach(async (line, i) => {
-				ctx.fillText(line, avatarWidth + 50, yStart + (fontSzie + 5) * i);
+				ctx.fillText(line, x, yStart + (fontSzie + 5) * i);
 			});
 
 			ctx.textAlign = "end";
