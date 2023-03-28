@@ -1,21 +1,24 @@
 import { getDevGuildId } from "#utils/config";
+import { ApplyOptions } from "@sapphire/decorators";
 import { isMessageInstance } from "@sapphire/discord.js-utilities";
 import { ChatInputCommand, Command } from "@sapphire/framework";
 import { ApplicationCommandType } from "discord.js";
 
-export class UserCommand extends Command {
-	public constructor(context: Command.Context, options: Command.Options) {
-		super(context, { ...options });
-	}
 
+@ApplyOptions<Command.Options>({
+	name:"ping",
+	description:"Ping bot to see if it is alive.",
+	enabled:true
+})
+export class UserCommand extends Command {
 	public override registerApplicationCommands(
 		registry: ChatInputCommand.Registry
 	) {
 		registry.registerChatInputCommand(
 			(builder) =>
 				builder //
-					.setName("ping")
-					.setDescription("Ping bot to see if it is alive."),
+					.setName(this.name)
+					.setDescription(this.description),
 			{
 				guildIds: getDevGuildId(),
 			}

@@ -3,7 +3,11 @@ import { ChatInputCommand, Command } from "@sapphire/framework";
 import { ApplicationCommandType, AttachmentBuilder } from "discord.js";
 import { createCanvas, loadImage } from "canvas";
 import { request } from "undici";
+import { ApplyOptions } from "@sapphire/decorators";
 
+@ApplyOptions<Command.Options>({
+	name:"quote",
+})
 export class UserCommand extends Command {
 	public constructor(context: Command.Context, options: Command.Options) {
 		super(context, { ...options });
