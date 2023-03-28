@@ -1,0 +1,10 @@
+{
+    "ping":{
+        "name":"ping",
+        "description":"取得機器人延遲",
+        "responses":{
+            "pong":"The round trip took **{{diff}}ms** and the heartbeat being **{{ping}}ms**",
+            "failed":"Failed to retrieve ping..."
+        }
+    }
+}
